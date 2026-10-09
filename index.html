@@ -1,0 +1,511 @@
+<!DOCTYPE html>
+<html lang="it" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Maestro Pianista | Sito Ufficiale & Prenotazione Prove</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&display=swap" rel="stylesheet">
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="style.css">
+</head>
+<body class="bg-[#0c0a09] text-[#f5f5f4] antialiased min-h-screen flex flex-col justify-between">
+
+    <!-- NAVBAR -->
+    <header class="sticky top-0 z-50 bg-[#0c0a09]/90 backdrop-blur-md border-b gold-border">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between">
+            <a href="#" class="font-serif text-2xl font-bold tracking-wider gold-gradient">MAESTRO PIANISTA</a>
+            
+            <!-- Menu Desktop -->
+            <nav class="hidden md:flex items-center space-x-8 text-sm font-medium">
+                <a href="#home" class="hover:text-amber-400">Home</a>
+                <a href="#curriculum" class="hover:text-amber-400">Curriculum</a>
+                <a href="#collaborazioni" class="hover:text-amber-400">Collaborazioni</a>
+                <a href="#prenotazioni" class="hover:text-amber-400">Prove</a>
+                <a href="#sondaggio" class="hover:text-amber-400">Sondaggio</a>
+                <a href="#contatti" class="hover:text-amber-400">Contatti</a>
+                <a href="#admin" class="px-4 py-2 border gold-border rounded-lg text-amber-400 hover:bg-amber-400/10">Area Riservata</a>
+            </nav>
+
+            <!-- Menu Mobile Button -->
+            <button id="menu-btn" class="md:hidden text-amber-400 focus:outline-none">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
+                </svg>
+            </button>
+        </div>
+
+        <!-- Menu Mobile Drawer -->
+        <div id="mobile-menu" class="hidden md:hidden bg-[#1c1917] border-b gold-border px-4 pt-2 pb-6 space-y-3">
+            <a href="#home" class="block py-2 hover:text-amber-400">Home</a>
+            <a href="#curriculum" class="block py-2 hover:text-amber-400">Curriculum</a>
+            <a href="#collaborazioni" class="block py-2 hover:text-amber-400">Collaborazioni</a>
+            <a href="#prenotazioni" class="block py-2 hover:text-amber-400">Prove</a>
+            <a href="#sondaggio" class="block py-2 hover:text-amber-400">Sondaggio</a>
+            <a href="#contatti" class="block py-2 hover:text-amber-400">Contatti</a>
+            <a href="#admin" class="block py-2 text-amber-400 font-semibold">Area Riservata</a>
+        </div>
+    </header>
+
+    <!-- MAIN CONTENT -->
+    <main class="flex-grow">
+        
+        <!-- HERO SECTION -->
+        <section id="home" class="relative py-24 md:py-36 overflow-hidden flex items-center">
+            <div class="absolute inset-0 z-0 opacity-20 bg-[radial-gradient(#ca8a04_1px,transparent_1px)] [background-size:16px_16px]"></div>
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10 grid grid-cols-1 md:grid-cols-2 gap-12 items-center">
+                <div class="space-y-6 text-center md:text-left">
+                    <span class="text-amber-500 tracking-widest text-sm uppercase font-semibold">Concerto & Didattica</span>
+                    <h1 class="text-4xl sm:text-6xl font-bold font-serif leading-tight">Arte, Passione & <span class="gold-gradient">Magia Tastieristica</span></h1>
+                    <p class="text-stone-400 text-lg leading-relaxed">Benvenuti nel sito ufficiale del Maestro. Solista, camerista e docente dedito alla diffusione del grande repertorio pianistico classico e contemporaneo.</p>
+                    <div class="flex flex-col sm:flex-row justify-center md:justify-start gap-4 pt-4">
+                        <a href="#prenotazioni" class="px-8 py-3.5 bg-amber-600 text-stone-950 font-semibold rounded-lg hover:bg-amber-500 text-center">Prenota una Prova</a>
+                        <a href="#curriculum" class="px-8 py-3.5 border gold-border text-amber-400 font-semibold rounded-lg hover:bg-amber-400/10 text-center">Scopri il Curriculum</a>
+                    </div>
+                </div>
+                <div class="flex justify-center">
+                    <div class="relative w-72 h-96 sm:w-80 sm:h-[420px] rounded-2xl overflow-hidden border-2 gold-border shadow-2xl bg-stone-900 flex items-center justify-center">
+                        <img src="DanieleNotaro (1).jpeg" alt="Maestro Daniele Notaro" class="w-full h-full object-cover">
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- CURRICULUM SECTION -->
+        <section id="curriculum" class="py-20 bg-stone-950/60 border-t gold-border">
+            <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+                <div class="text-center space-y-3 mb-16">
+                    <h2 class="text-3xl sm:text-4xl font-serif font-bold">Curriculum Vitae</h2>
+                    <p class="text-stone-400 max-w-xl mx-auto">Il percorso artistico, i premi e l'attività didattica e concertistica.</p>
+                </div>
+                
+                <div class="space-y-8 text-stone-300 leading-relaxed bg-stone-900/60 border gold-border p-6 sm:p-10 rounded-2xl shadow-xl">
+                    <p>
+                        <strong>Daniele Notaro</strong> intraprende gli studi musicali sotto la guida della professoressa Carmela Leone, diplomandosi con il massimo dei voti presso il Conservatorio "Arcangelo Corelli" di Messina. La sua formazione si è arricchita grazie all'ammissione come allievo effettivo alle prestigiose masterclass del M° Lazar Berman (1995) e, successivamente, del M° Sergio Perticaroli (2000 e 2001), esperienze che hanno contribuito a definire la sua maturità tecnica e interpretativa.
+                    </p>
+                    <p>
+                        Nel corso degli anni ha partecipato a numerosi concorsi e rassegne musicali, distinguendosi sia nella musica da camera sia nella sezione solistica. Tra i riconoscimenti cameristici più significativi figurano il 1° Premio Assoluto alla V Rassegna Musicale "R. Schumann" di Messina (2001), il 1º Premio Assoluto al 6° Concorso Nazionale "Premio Città di Brindisi" (2001), il 1° Premio alla IV Rassegna "R. Schumann" (2000), oltre ai podi ottenuti ai concorsi "G. Campochiaro" di Pedara, "Albanese" di Caccamo e al Concorso Internazionale "Magma" di Sant'Agata Li Battiati. In ambito solistico ha conquistato il 1º Premio al IV Concorso Internazionale "Città di Barcellona Pozzo di Gotto" e il 3º Premio al XXI Concorso Internazionale Pianistico "A.M.A. Calabria" di Lamezia Terme.
+                    </p>
+                    <p>
+                        Grazie al contributo dei maestri A. Cannavale, L. Paolicelli e A. Bonaccorso, Daniele ha sviluppato un profondo interesse per la musica da camera, esibendosi in qualità di pianista accompagnatore al Festival Cornistico dell'Etna e nelle masterclass di artisti di fama internazionale, tra cui Alessio Allegrini, Andrea Cesari, Piero Mangano, Andrea Lucchi, Salvatore Palmeri, Vincenzo Paci, Gianluigi Caldarola, Angelo Bonaccorso, Hervé Joulain e Guglielmo Pellarin. Ha inoltre lavorato con direttori quali Franco Cesarini, Giuseppe Ratti e Andrea Loss, e con cantanti del calibro di Desirée Rancatore e Daniela Schillaci.
+                    </p>
+                    <p>
+                        Svolge un'intensa attività come maestro accompagnatore nelle classi di strumenti a fiato, violino e canto presso il Conservatorio "A. Corelli" di Messina, dove mette a disposizione la sua esperienza e la sua sensibilità musicale a supporto delle nuove generazioni di musicisti.
+                    </p>
+                </div>
+            </div>
+        </section>
+
+
+        <!-- GALLERIA FOTOGRAFICA -->
+        <section id="galleria" class="py-20 bg-stone-950/40 border-t gold-border">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                <div class="text-center space-y-3 mb-16">
+                    <h2 class="text-3xl sm:text-4xl font-serif font-bold">Galleria Fotografica</h2>
+                    <p class="text-stone-400">Scatti dai concerti, dalle prove e momenti di vita musicale.</p>
+                </div>
+                
+                <!-- Griglia per le 4 immagini -->
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+                    <!-- Foto 1 -->
+                    <div class="overflow-hidden rounded-xl border gold-border h-72 bg-stone-900 shadow-lg group">
+                        <img src="DanieleNotaro (1).jpeg" alt="Daniele Notaro 1" class="w-full h-full object-cover group-hover:scale-105 transition duration-500">
+                    </div>
+                    <!-- Foto 2 -->
+                    <div class="overflow-hidden rounded-xl border gold-border h-72 bg-stone-900 shadow-lg group">
+                        <img src="DanieleNotaro (2).jpeg" alt="Daniele Notaro 2" class="w-full h-full object-cover group-hover:scale-105 transition duration-500">
+                    </div>
+                    <!-- Foto 3 -->
+                    <div class="overflow-hidden rounded-xl border gold-border h-72 bg-stone-900 shadow-lg group">
+                        <img src="DanieleNotaro (3).jpeg" alt="Daniele Notaro 3" class="w-full h-full object-cover group-hover:scale-105 transition duration-500">
+                    </div>
+                    <!-- Foto 4 -->
+                    <div class="overflow-hidden rounded-xl border gold-border h-72 bg-stone-900 shadow-lg group">
+                        <img src="DanieleNotaro (4).jpeg" alt="Daniele Notaro 4" class="w-full h-full object-cover group-hover:scale-105 transition duration-500">
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        
+        
+
+        <!-- COLLABORAZIONI SECTION -->
+        <section id="collaborazioni" class="py-20">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                <div class="text-center space-y-3 mb-16">
+                    <h2 class="text-3xl sm:text-4xl font-serif font-bold">Collaborazioni</h2>
+                    <p class="text-stone-400">Orestre, ensemble e istituzioni musicali con cui collabora regolarmente.</p>
+                </div>
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
+                    <div class="bg-stone-900/80 border gold-border p-6 rounded-xl hover:border-amber-500 transition">
+                        <h3 class="text-xl font-serif font-semibold text-amber-400 mb-2">Orchestra Sinfonica Regionale</h3>
+                        <p class="text-stone-400 text-sm">Pianista solista per i concerti sinfonici stagionali e produzioni liriche.</p>
+                    </div>
+                    <div class="bg-stone-900/80 border gold-border p-6 rounded-xl hover:border-amber-500 transition">
+                        <h3 class="text-xl font-serif font-semibold text-amber-400 mb-2">Duo Cameristico d'Archi</h3>
+                        <p class="text-stone-400 text-sm">Collaborazione stabile con prime parti d'orchestra per il repertorio violinistico e violoncellistico.</p>
+                    </div>
+                    <div class="bg-stone-900/80 border gold-border p-6 rounded-xl hover:border-amber-500 transition">
+                        <h3 class="text-xl font-serif font-semibold text-amber-400 mb-2">Accademie Musicali Internazionali</h3>
+                        <p class="text-stone-400 text-sm">Direttore artistico ospite e docente di masterclass estive di interpretazione.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- PRENOTAZIONE PROVE SECTION -->
+        <section id="prenotazioni" class="py-20 bg-stone-950/60 border-t gold-border">
+            <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+                <div class="text-center space-y-3 mb-12">
+                    <h2 class="text-3xl sm:text-4xl font-serif font-bold">Prenota una Prova</h2>
+                    <p class="text-stone-400">Seleziona un giorno, scegli l'orario disponibile e inserisci i dettagli del brano.</p>
+                </div>
+
+                <div class="bg-stone-900 border gold-border p-6 sm:p-8 rounded-2xl shadow-xl space-y-8">
+                    <!-- Step 1: Calendario & Data -->
+                    <div>
+                        <label class="block text-sm font-medium text-amber-400 mb-2">1. Seleziona la Data della Prova</label>
+                        <input type="date" id="booking-date" class="w-full bg-stone-950 border gold-border rounded-lg px-4 py-3 text-stone-200 focus:outline-none focus:border-amber-500">
+                    </div>
+
+                    <!-- Step 2: Orari Disponibili Dinamici -->
+                    <div id="time-slots-container" class="hidden">
+                        <label class="block text-sm font-medium text-amber-400 mb-2">2. Seleziona l'Orario (Gli slot successivi si ricalcolano in base alla durata)</label>
+                        <div id="slots-grid" class="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                            <!-- Popolato da JS -->
+                        </div>
+                    </div>
+
+                    <!-- Step 3: Dettagli Allievo / Prova -->
+                    <form id="booking-form" class="hidden space-y-4 pt-4 border-t border-stone-800">
+                        <h3 class="font-serif text-lg text-amber-400">3. Inserisci i tuoi dati e il programma</h3>
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                            <div>
+                                <label class="block text-xs text-stone-400 mb-1">Nome *</label>
+                                <input type="text" id="b-name" required class="w-full bg-stone-950 border gold-border rounded-lg px-3 py-2 text-stone-200">
+                            </div>
+                            <div>
+                                <label class="block text-xs text-stone-400 mb-1">Cognome *</label>
+                                <input type="text" id="b-surname" required class="w-full bg-stone-950 border gold-border rounded-lg px-3 py-2 text-stone-200">
+                            </div>
+                        </div>
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                            <div>
+                                <label class="block text-xs text-stone-400 mb-1">Strumento / Voce *</label>
+                                <input type="text" id="b-instrument" placeholder="Es. Violino, Soprano..." required class="w-full bg-stone-950 border gold-border rounded-lg px-3 py-2 text-stone-200">
+                            </div>
+                            <div>
+                                <label class="block text-xs text-stone-400 mb-1">Durata Desiderata *</label>
+                                <select id="b-duration" required class="w-full bg-stone-950 border gold-border rounded-lg px-3 py-2 text-stone-200">
+                                    <option value="30">30 minuti</option>
+                                    <option value="60" selected>60 minuti (1 ora)</option>
+                                    <option value="90">90 minuti</option>
+                                    <option value="120">120 minuti (2 ore)</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div>
+                            <label class="block text-xs text-stone-400 mb-1">Brano / Repertorio in prova *</label>
+                            <input type="text" id="b-piece" placeholder="Es. Sonata in Si minore..." required class="w-full bg-stone-950 border gold-border rounded-lg px-3 py-2 text-stone-200">
+                        </div>
+                        <button type="submit" class="w-full py-3.5 bg-amber-600 text-stone-950 font-semibold rounded-lg hover:bg-amber-500 mt-4">Conferma Prenotazione</button>
+                    </form>
+                </div>
+            </div>
+        </section>
+
+        <!-- SONDAGGIO ANONIMO SECTION -->
+        <section id="sondaggio" class="py-20">
+            <div class="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
+                <div class="text-center space-y-3 mb-12">
+                    <h2 class="text-3xl sm:text-4xl font-serif font-bold">Sondaggio Anonimo</h2>
+                    <p class="text-stone-400">La tua opinione è preziosa. Nessun dato personale viene registrato.</p>
+                </div>
+
+                <form id="survey-form" class="bg-stone-900 border gold-border p-6 sm:p-10 rounded-2xl shadow-xl space-y-8">
+                    
+                    <!-- PARTE 1: Professionalità e Preparazione -->
+                    <div class="space-y-6 border-b border-stone-800 pb-8">
+                        <h3 class="text-xl font-serif text-amber-400">1. Professionalità e Preparazione</h3>
+                        <p class="text-xs text-stone-400">Valuta le seguenti affermazioni con un punteggio da 1 (Per nulla d'accordo) a 5 (Totalmente d'accordo)</p>
+                        
+                        <!-- Domanda 1.1 -->
+                        <div class="space-y-2">
+                            <label class="block text-sm text-stone-200"><strong>Puntualità:</strong> Il pianista si è presentato puntuale alle prove e/o all'evento *</label>
+                            <div class="flex gap-4 sm:gap-6 text-sm text-stone-300">
+                                <label class="flex items-center gap-1.5"><input type="radio" name="q_puntualita" value="5" required class="accent-amber-500"> 5</label>
+                                <label class="flex items-center gap-1.5"><input type="radio" name="q_puntualita" value="4" class="accent-amber-500"> 4</label>
+                                <label class="flex items-center gap-1.5"><input type="radio" name="q_puntualita" value="3" class="accent-amber-500"> 3</label>
+                                <label class="flex items-center gap-1.5"><input type="radio" name="q_puntualita" value="2" class="accent-amber-500"> 2</label>
+                                <label class="flex items-center gap-1.5"><input type="radio" name="q_puntualita" value="1" class="accent-amber-500"> 1</label>
+                            </div>
+                        </div>
+
+                        <!-- Domanda 1.2 -->
+                        <div class="space-y-2">
+                            <label class="block text-sm text-stone-200"><strong>Preparazione del repertorio:</strong> Il pianista conosceva a fondo la partitura e le parti musicali richieste *</label>
+                            <div class="flex gap-4 sm:gap-6 text-sm text-stone-300">
+                                <label class="flex items-center gap-1.5"><input type="radio" name="q_preparazione" value="5" required class="accent-amber-500"> 5</label>
+                                <label class="flex items-center gap-1.5"><input type="radio" name="q_preparazione" value="4" class="accent-amber-500"> 4</label>
+                                <label class="flex items-center gap-1.5"><input type="radio" name="q_preparazione" value="3" class="accent-amber-500"> 3</label>
+                                <label class="flex items-center gap-1.5"><input type="radio" name="q_preparazione" value="2" class="accent-amber-500"> 2</label>
+                                <label class="flex items-center gap-1.5"><input type="radio" name="q_preparazione" value="1" class="accent-amber-500"> 1</label>
+                            </div>
+                        </div>
+
+                        <!-- Domanda 1.3 -->
+                        <div class="space-y-2">
+                            <label class="block text-sm text-stone-200"><strong>Flessibilità:</strong> Il pianista ha dimostrato capacità di adattamento a cambi di tempo, tonalità o dinamiche dell'ultimo minuto *</label>
+                            <div class="flex gap-4 sm:gap-6 text-sm text-stone-300">
+                                <label class="flex items-center gap-1.5"><input type="radio" name="q_flessibilita" value="5" required class="accent-amber-500"> 5</label>
+                                <label class="flex items-center gap-1.5"><input type="radio" name="q_flessibilita" value="4" class="accent-amber-500"> 4</label>
+                                <label class="flex items-center gap-1.5"><input type="radio" name="q_flessibilita" value="3" class="accent-amber-500"> 3</label>
+                                <label class="flex items-center gap-1.5"><input type="radio" name="q_flessibilita" value="2" class="accent-amber-500"> 2</label>
+                                <label class="flex items-center gap-1.5"><input type="radio" name="q_flessibilita" value="1" class="accent-amber-500"> 1</label>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- PARTE 2: Intesa Musicale e Performance -->
+                    <div class="space-y-6 border-b border-stone-800 pb-8">
+                        <h3 class="text-xl font-serif text-amber-400">2. Intesa Musicale e Performance</h3>
+                        <p class="text-xs text-stone-400">Valuta la qualità tecnica e artistica del servizio</p>
+
+                        <!-- Domanda 2.1 -->
+                        <div>
+                            <label class="block text-sm text-stone-200 mb-2"><strong>Sintonia ed Empatia:</strong> Come valuti l'intesa musicale e la capacità di ascolto del pianista durante l'esecuzione? *</label>
+                            <select id="s-sintonia" required class="w-full bg-stone-950 border gold-border rounded-lg px-3 py-2 text-stone-200">
+                                <option value="">Seleziona una valutazione...</option>
+                                <option value="Eccellente">Eccellente</option>
+                                <option value="Buona">Buona</option>
+                                <option value="Sufficiente">Sufficiente</option>
+                                <option value="Insufficiente">Insufficiente</option>
+                            </select>
+                        </div>
+
+                        <!-- Domanda 2.2 -->
+                        <div>
+                            <label class="block text-sm text-stone-200 mb-2"><strong>Supporto all'esecutore:</strong> Il pianista ha fornito una base solida e ti ha fatto sentire a tuo agio durante la performance *</label>
+                            <select id="s-supporto" required class="w-full bg-stone-950 border gold-border rounded-lg px-3 py-2 text-stone-200">
+                                <option value="">Seleziona una risposta...</option>
+                                <option value="Si, perfettamente">Sì, perfettamente</option>
+                                <option value="In parte">In parte</option>
+                                <option value="No, ho riscontrato difficoltà">No, ho riscontrato difficoltà</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <!-- PARTE 3: Valutazione Generale e Futuro -->
+                    <div class="space-y-6 pb-2">
+                        <h3 class="text-xl font-serif text-amber-400">3. Valutazione Generale e Futuro</h3>
+
+                        <!-- Domanda 3.1 -->
+                        <div>
+                            <label class="block text-sm text-stone-200 mb-2"><strong>Soddisfazione complessiva:</strong> Come valuti nel complesso il servizio ricevuto *</label>
+                            <select id="s-soddisfazione" required class="w-full bg-stone-950 border gold-border rounded-lg px-3 py-2 text-stone-200">
+                                <option value="">Seleziona una valutazione...</option>
+                                <option value="Molto soddisfatto">Molto soddisfatto</option>
+                                <option value="Soddisfatto">Soddisfatto</option>
+                                <option value="Neutrale">Neutrale</option>
+                                <option value="Insoddisfatto">Insoddisfatto</option>
+                            </select>
+                        </div>
+
+                        <!-- Domanda 3.2 -->
+                        <div class="space-y-2">
+                            <label class="block text-sm text-stone-200"><strong>Disponibilità:</strong> È stato facile concordare le date delle prove e i dettagli dell'evento? *</label>
+                            <div class="flex gap-4 sm:gap-6 text-sm text-stone-300">
+                                <label class="flex items-center gap-1.5"><input type="radio" name="q_disponibilita" value="5" required class="accent-amber-500"> 5</label>
+                                <label class="flex items-center gap-1.5"><input type="radio" name="q_disponibilita" value="4" class="accent-amber-500"> 4</label>
+                                <label class="flex items-center gap-1.5"><input type="radio" name="q_disponibilita" value="3" class="accent-amber-500"> 3</label>
+                                <label class="flex items-center gap-1.5"><input type="radio" name="q_disponibilita" value="2" class="accent-amber-500"> 2</label>
+                                <label class="flex items-center gap-1.5"><input type="radio" name="q_disponibilita" value="1" class="accent-amber-500"> 1</label>
+                            </div>
+                        </div>
+
+                        <!-- Domanda 3.3 -->
+                        <div>
+                            <label class="block text-sm text-stone-200 mb-2"><strong>Raccomandazione:</strong> Consiglieresti questo pianista accompagnatore a un collega o amico? *</label>
+                            <select id="s-raccomandazione" required class="w-full bg-stone-950 border gold-border rounded-lg px-3 py-2 text-stone-200">
+                                <option value="">Seleziona una risposta...</option>
+                                <option value="Si, sicuramente">Sì, sicuramente</option>
+                                <option value="Probabilmente">Probabilmente</option>
+                                <option value="No">No</option>
+                            </select>
+                        </div>
+
+                        <!-- Domanda 3.4 (Commenti liberi) -->
+                        <div>
+                            <label class="block text-sm text-stone-200 mb-2"><strong>Suggerimenti o commenti liberi:</strong> Spazio per descrivere note su cosa ha funzionato meglio o cosa si può migliorare</label>
+                            <textarea id="s-commenti" rows="3" placeholder="Scrivi liberamente..." class="w-full bg-stone-950 border gold-border rounded-lg px-3 py-2 text-stone-200"></textarea>
+                        </div>
+                    </div>
+
+                    <button type="submit" class="w-full py-3.5 bg-amber-600 text-stone-950 font-semibold rounded-lg hover:bg-amber-500">Invia Risposta Anonima</button>
+                </form>
+            </div>
+        </section>
+
+        <!-- CONTATTI & SOCIAL SECTION -->
+        <section id="contatti" class="py-20 bg-stone-950/60 border-t gold-border">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 grid grid-cols-1 md:grid-cols-2 gap-12">
+                <div class="space-y-6">
+                    <h2 class="text-3xl font-serif font-bold">Contatti</h2>
+                    <p class="text-stone-400">Per informazioni su concerti, masterclass, collaborazioni o disponibilità sala prove.</p>
+                    <div class="space-y-3 text-stone-300">
+                        <p class="flex items-center gap-3">📍 Conservatorio "Arcangelo Corelli", Messina</p>
+                        <p class="flex items-center gap-3">✉️ <a href="mailto:daniele.notaro76@libero.it" class="hover:text-amber-400 underline">daniele.notaro76@libero.it</a></p>
+                        <p class="flex items-center gap-3">📞 <a href="tel:3357106805" class="hover:text-amber-400 underline">+39 335 7106805</a></p>
+                    </div>
+                </div>
+                <div class="space-y-6">
+                    <h3 class="text-xl font-serif font-bold text-amber-400">Profili Social & Web</h3>
+                    <p class="text-stone-400">Segui i canali ufficiali per rimanere aggiornato sulle attività artistiche e musicali.</p>
+                    <div class="flex flex-wrap gap-4">
+                        <a href="https://www.facebook.com/share/1HZSSWJRoU/?mibextid=wwXIfr" target="_blank" rel="noopener noreferrer" class="px-5 py-2.5 bg-stone-900 border gold-border rounded-lg hover:border-amber-400 text-stone-200">Facebook</a>
+                        <a href="https://www.instagram.com/danielenotaro76?srtk=bzlhOTg5eTB3YW92" target="_blank" rel="noopener noreferrer" class="px-5 py-2.5 bg-stone-900 border gold-border rounded-lg hover:border-amber-400 text-stone-200">Instagram</a>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+
+        <!-- AREA RISERVATA (PADRE) -->
+        <section id="admin" class="py-20 border-t gold-border bg-stone-950">
+            <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+                <div class="text-center space-y-3 mb-12">
+                    <h2 class="text-3xl sm:text-4xl font-serif font-bold">Area Riservata </h2>
+                    <p class="text-stone-400">Accesso protetto per la visualizzazione delle prove e dei sondaggi.</p>
+                </div>
+
+                <!-- Form Login -->
+                <div id="admin-login-box" class="max-w-md mx-auto bg-stone-900 border gold-border p-8 rounded-2xl shadow-xl">
+                    <form id="login-form" class="space-y-4">
+                        <div>
+                            <label class="block text-sm text-stone-300 mb-2">Password di Accesso</label>
+                            <input type="password" id="admin-password" placeholder="Inserisci password..." required class="w-full bg-stone-950 border gold-border rounded-lg px-4 py-3 text-stone-200">
+                        </div>
+                        <button type="submit" class="w-full py-3 bg-amber-600 text-stone-950 font-semibold rounded-lg hover:bg-amber-500">Accedi all'Area</button>
+                    </form>
+                </div>
+
+                <!-- Dashboard Riservata (Nascosta finché non si effettua il login) -->
+                <div id="admin-dashboard" class="hidden space-y-12">
+                    <div class="flex justify-between items-center border-b border-stone-800 pb-4">
+                        <h3 class="text-2xl font-serif text-amber-400">Pannello di Controllo</h3>
+                        <button id="logout-btn" class="px-4 py-2 bg-red-900/40 border border-red-700 text-red-300 rounded-lg text-sm">Esci</button>
+                    </div>
+
+                    <!-- Sezione Prove Prenotate -->
+                    <div class="space-y-4">
+                        <h4 class="text-xl font-serif">Prove Prenotate</h4>
+                        <div class="overflow-x-auto bg-stone-900 border gold-border rounded-xl">
+                            <table class="w-full text-left text-sm text-stone-300">
+                                <thead class="bg-stone-950 text-amber-400 border-b gold-border font-serif">
+                                    <tr>
+                                        <th class="p-3">Data</th>
+                                        <th class="p-3">Orario</th>
+                                        <th class="p-3">Allievo</th>
+                                        <th class="p-3">Strumento</th>
+                                        <th class="p-3">Durata</th>
+                                        <th class="p-3">Brano</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="admin-bookings-table">
+                                    <!-- Popolato da JS -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <!-- Sezione Risposte Sondaggi -->
+                    <div class="space-y-4">
+                        <h4 class="text-xl font-serif">Risposte Sondaggi Anonimi</h4>
+                        <div class="overflow-x-auto bg-stone-900 border gold-border rounded-xl">
+                            <table class="w-full text-left text-sm text-stone-300">
+                                <thead class="bg-stone-950 text-amber-400 border-b gold-border font-serif">
+                                    <tr>
+                                        <th class="p-3">Data Invio</th>
+                                        <th class="p-3">Q1 (Acustica/Piano)</th>
+                                        <th class="p-3">Q2 (Suggerimenti)</th>
+                                        <th class="p-3">Voto (1-5)</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="admin-surveys-table">
+                                    <!-- Popolato da JS -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <!-- SEZIONE NUOVA: Gestione Giorni / Orari Bloccati dal Maestro -->
+                    <div class="space-y-6 bg-stone-900 border gold-border p-6 rounded-xl">
+                        <h4 class="text-xl font-serif text-amber-400">Gestione Chiusure e Giorni/Orari Occupati</h4>
+                        <p class="text-sm text-stone-400">Blocca un'intera giornata o un singolo orario in cui non desideri ricevere prenotazioni.</p>
+                        
+                        <form id="block-form" class="grid grid-cols-1 sm:grid-cols-4 gap-4 items-end pt-2">
+                            <div>
+                                <label class="block text-xs text-stone-300 mb-1">Tipo di Blocco</label>
+                                <select id="block-type" class="w-full bg-stone-950 border gold-border rounded-lg px-3 py-2 text-stone-200 text-sm">
+                                    <option value="day">Intera Giornata</option>
+                                    <option value="slot">Orario Specifico</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="block text-xs text-stone-300 mb-1">Data</label>
+                                <input type="date" id="block-date" required class="w-full bg-stone-950 border gold-border rounded-lg px-3 py-2 text-stone-200 text-sm">
+                            </div>
+                            <div id="block-time-wrapper">
+                                <label class="block text-xs text-stone-300 mb-1">Orario (se parziale)</label>
+                                <select id="block-time" class="w-full bg-stone-950 border gold-border rounded-lg px-3 py-2 text-stone-200 text-sm">
+                                    <option value="09:00">09:00</option>
+                                    <option value="10:00">10:00</option>
+                                    <option value="11:00">11:00</option>
+                                    <option value="12:00">12:00</option>
+                                    <option value="14:00">14:00</option>
+                                    <option value="15:00">15:00</option>
+                                    <option value="16:00">16:00</option>
+                                    <option value="17:00">17:00</option>
+                                    <option value="18:00">18:00</option>
+                                </select>
+                            </div>
+                            <div>
+                                <button type="submit" class="w-full py-2.5 bg-amber-600 text-stone-950 font-semibold rounded-lg hover:bg-amber-500 text-sm">Aggiungi Blocco</button>
+                            </div>
+                        </form>
+
+                        <!-- Tabella Blocchi Attivi -->
+                        <div class="overflow-x-auto pt-4 border-t border-stone-800">
+                            <h5 class="text-sm font-semibold text-stone-300 mb-3">Periodi attualmente bloccati:</h5>
+                            <table class="w-full text-left text-sm text-stone-300">
+                                <thead class="bg-stone-950 text-amber-400 border-b gold-border font-serif text-xs">
+                                    <tr>
+                                        <th class="p-2.5">Tipo</th>
+                                        <th class="p-2.5">Data</th>
+                                        <th class="p-2.5">Orario</th>
+                                        <th class="p-2.5 text-right">Azione</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="admin-blocks-table">
+                                    <!-- Popolato da JS -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- FOOTER -->
+    <footer class="bg-stone-950 border-t gold-border py-8 text-center text-sm text-stone-500">
+        <p>&copy; 2026 Maestro Pianista. Tutti i diritti riservati.</p>
+    </footer>
+
+    <!-- Script Frontend -->
+    <script src="script.js"></script>
+</body>
+</html>
