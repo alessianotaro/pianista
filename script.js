@@ -1,10 +1,19 @@
 document.addEventListener('DOMContentLoaded', () => {
-    // Menu mobile toggle
+    // Menu mobile toggle e chiusura automatica al click
     const menuBtn = document.getElementById('menu-btn');
     const mobileMenu = document.getElementById('mobile-menu');
-    if (menuBtn) {
+    
+    if (menuBtn && mobileMenu) {
         menuBtn.addEventListener('click', () => {
             mobileMenu.classList.toggle('hidden');
+        });
+
+        // Chiudi il menu quando si clicca su qualsiasi link all'interno
+        const mobileLinks = mobileMenu.querySelectorAll('a');
+        mobileLinks.forEach(link => {
+            link.addEventListener('click', () => {
+                mobileMenu.classList.add('hidden');
+            });
         });
     }
 
