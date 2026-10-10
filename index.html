@@ -67,7 +67,7 @@
                 </div>
                 <div class="flex justify-center">
                     <div class="relative w-72 h-96 sm:w-80 sm:h-[420px] rounded-2xl overflow-hidden border-2 gold-border shadow-2xl bg-stone-900 flex items-center justify-center">
-                        <img src="DanieleNotaro (1).jpeg" alt="Maestro Daniele Notaro" class="w-full h-full object-cover">
+                        <img src="DanieleNotaro (2).jpeg" alt="Maestro Daniele Notaro" class="w-full h-full object-cover">
                     </div>
                 </div>
             </div>
@@ -129,9 +129,6 @@
             </div>
         </section>
 
-        
-        
-
         <!-- COLLABORAZIONI SECTION -->
         <section id="collaborazioni" class="py-20">
             <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -158,61 +155,15 @@
 
         <!-- PRENOTAZIONE PROVE SECTION -->
         <section id="prenotazioni" class="py-20 bg-stone-950/60 border-t gold-border">
-            <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="max-w-xl mx-auto px-4 sm:px-6 lg:px-8">
                 <div class="text-center space-y-3 mb-12">
                     <h2 class="text-3xl sm:text-4xl font-serif font-bold">Prenota una Prova</h2>
-                    <p class="text-stone-400">Seleziona un giorno, scegli l'orario disponibile e inserisci i dettagli del brano.</p>
+                    <p class="text-stone-400">Scegli il giorno, la durata e l'orario disponibile per la tua prova.</p>
                 </div>
 
-                <div class="bg-stone-900 border gold-border p-6 sm:p-8 rounded-2xl shadow-xl space-y-8">
-                    <!-- Step 1: Calendario & Data -->
-                    <div>
-                        <label class="block text-sm font-medium text-amber-400 mb-2">1. Seleziona la Data della Prova</label>
-                        <input type="date" id="booking-date" class="w-full bg-stone-950 border gold-border rounded-lg px-4 py-3 text-stone-200 focus:outline-none focus:border-amber-500">
-                    </div>
-
-                    <!-- Step 2: Orari Disponibili Dinamici -->
-                    <div id="time-slots-container" class="hidden">
-                        <label class="block text-sm font-medium text-amber-400 mb-2">2. Seleziona l'Orario (Gli slot successivi si ricalcolano in base alla durata)</label>
-                        <div id="slots-grid" class="grid grid-cols-2 sm:grid-cols-4 gap-3">
-                            <!-- Popolato da JS -->
-                        </div>
-                    </div>
-
-                    <!-- Step 3: Dettagli Allievo / Prova -->
-                    <form id="booking-form" class="hidden space-y-4 pt-4 border-t border-stone-800">
-                        <h3 class="font-serif text-lg text-amber-400">3. Inserisci i tuoi dati e il programma</h3>
-                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                            <div>
-                                <label class="block text-xs text-stone-400 mb-1">Nome *</label>
-                                <input type="text" id="b-name" required class="w-full bg-stone-950 border gold-border rounded-lg px-3 py-2 text-stone-200">
-                            </div>
-                            <div>
-                                <label class="block text-xs text-stone-400 mb-1">Cognome *</label>
-                                <input type="text" id="b-surname" required class="w-full bg-stone-950 border gold-border rounded-lg px-3 py-2 text-stone-200">
-                            </div>
-                        </div>
-                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                            <div>
-                                <label class="block text-xs text-stone-400 mb-1">Strumento / Voce *</label>
-                                <input type="text" id="b-instrument" placeholder="Es. Violino, Soprano..." required class="w-full bg-stone-950 border gold-border rounded-lg px-3 py-2 text-stone-200">
-                            </div>
-                            <div>
-                                <label class="block text-xs text-stone-400 mb-1">Durata Desiderata *</label>
-                                <select id="b-duration" required class="w-full bg-stone-950 border gold-border rounded-lg px-3 py-2 text-stone-200">
-                                    <option value="30">30 minuti</option>
-                                    <option value="60" selected>60 minuti (1 ora)</option>
-                                    <option value="90">90 minuti</option>
-                                    <option value="120">120 minuti (2 ore)</option>
-                                </select>
-                            </div>
-                        </div>
-                        <div>
-                            <label class="block text-xs text-stone-400 mb-1">Brano / Repertorio in prova *</label>
-                            <input type="text" id="b-piece" placeholder="Es. Sonata in Si minore..." required class="w-full bg-stone-950 border gold-border rounded-lg px-3 py-2 text-stone-200">
-                        </div>
-                        <button type="submit" class="w-full py-3.5 bg-amber-600 text-stone-950 font-semibold rounded-lg hover:bg-amber-500 mt-4">Conferma Prenotazione</button>
-                    </form>
+                <!-- Contenitore Calendario Widget integrato gestito da JS -->
+                <div id="booking-app" class="bg-stone-900 border gold-border p-6 rounded-2xl shadow-xl space-y-6 text-stone-200">
+                    <!-- Popolato dinamicamente da script.js -->
                 </div>
             </div>
         </section>

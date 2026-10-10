@@ -8,24 +8,54 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // Gestione Prenotazioni Prove & Blocchi
-    const dateInput = document.getElementById('booking-date');
-    const slotsContainer = document.getElementById('time-slots-container');
-    const slotsGrid = document.getElementById('slots-grid');
-    const bookingForm = document.getElementById('booking-form');
-    const durationSelect = document.getElementById('b-duration');
+    // Gestione Calendario Prenotazioni Integrato & Blocchi
+    const appContainer = document.getElementById('booking-app');
+    let mon = new Date(), sel = null, start = null, durationMinutes = 60, existingBookings = [], blockedSlotsList = [], err = "", done = null;
+    mon.setDate(1);
 
-    let selectedDate = '';
-    let selectedTime = '';
-    let existingBookings = [];
-    let blockedSlotsList = [];
+    const pad = n => String(n).padStart(2, "0");
+    const hm = m => pad(Math.floor(m / 60)) + ":" + pad(m % 60);
+    const ds = d => d.getFullYear() + "-" + pad(d.getMonth() + 1) + "-" + pad(d.getDate());
+    const it = d => new Date(d + "T12:00").toLocaleDateString("it-IT", { weekday: "long", day: "numeric", month: "long" });
 
-    // Imposta data minima a oggi
-    const todayStr = new Date().toISOString().split('T')[0];
-    dateInput.min = todayStr;
-    dateInput.value = todayStr;
+    // Orari base disponibili giornalieri
+    const baseSlots = ['09:00', '10:00', '11:00', '12:00', '14:00', '15:00', '16:00', '17:00', '18:00'];
 
-    async function fetchData() {
+    function timeToMinutes(timeStr) {
+        const [h, m] = timeStr.split(':').map(Number);
+        return h * 60 + m;
+    }
+
+    function free(t, dur) {
+        const isDayBlocked = blockedSlotsList.some(b => b.date === sel && b.type === 'day');
+        if (isDayBlocked) return false;
+
+        const dateBlocks = blockedSlotsList.filter(b => b.date === sel && b.type === 'slot');
+        const slotTimeStr = hm(t);
+        if (dateBlocks.some(b => b.time === slotTimeStr)) return false;
+
+        return !existingBookings.some(b => {
+            if (b.date !== sel) return false;
+            const bTimeMinutes = timeToMinutes(b.time);
+            return bTimeMinutes < t + dur && bTimeMinutes + b.duration > t;
+        });
+    }
+
+    function getAvailableSlots() {
+        const now = new Date(), today = ds(now) === sel, r = [];
+        baseSlots.forEach(slotStr => {
+            const t = timeToMinutes(slotStr);
+            const past = today && t <= now.getHours() * 60 + now.getMinutes();
+            if (!past && free(t, durationMinutes)) {
+                r.push([t, true]);
+            } else {
+                r.push([t, false]);
+            }
+        });
+        return r;
+    }
+
+    async function loadBookingData() {
         try {
             const [resB, resBl] = await Promise.all([
                 fetch('/api/bookings'),
@@ -36,115 +66,176 @@ document.addEventListener('DOMContentLoaded', () => {
             if (jsonB.success) existingBookings = jsonB.data;
             if (jsonBl.success) blockedSlotsList = jsonBl.data;
         } catch (e) {
-            console.error('Errore caricamento dati:', e);
+            console.error('Errore caricamento dati calendario:', e);
         }
     }
 
-    // Orari base disponibili giornalieri
-    const baseSlots = ['09:00', '10:00', '11:00', '12:00', '14:00', '15:00', '16:00', '17:00', '18:00'];
+    async function renderCalendarWidget() {
+        if (!appContainer) return;
 
-    async function renderSlots() {
-        await fetchData();
-        selectedDate = dateInput.value;
-        slotsContainer.classList.remove('hidden');
-        slotsGrid.innerHTML = '';
-        bookingForm.classList.add('hidden');
-        selectedTime = '';
+        if (done) {
+            appContainer.innerHTML = `
+                <div class="text-center py-8 space-y-4">
+                    <h3 class="text-2xl font-serif text-amber-400">Prenotazione confermata ✨</h3>
+                    <p class="text-stone-300"><b>${done.name} ${done.surname}</b>, ti aspettiamo per la prova.</p>
+                    <p class="text-sm text-stone-400">${it(done.date)}<br>ore ${hm(done.start)} · ${done.duration} min (${done.instrument})</p>
+                    <button type="button" onclick="window.resetBooking()" class="px-6 py-2.5 bg-amber-600 text-stone-950 font-semibold rounded-lg hover:bg-amber-500">Nuova prenotazione</button>
+                </div>`;
+            return;
+        }
 
-        // Controlla se l'intera giornata è bloccata dal Maestro
-        const isDayBlocked = blockedSlotsList.some(b => b.date === selectedDate && b.type === 'day');
+        const y = mon.getFullYear(), mo = mon.getMonth(), first = (new Date(y, mo, 1).getDay() + 6) % 7, dim = new Date(y, mo + 1, 0).getDate(), td = ds(new Date());
+        let cal = `<div class="grid grid-cols-7 gap-2 text-center text-xs text-stone-400 mb-2">`;
+        ["L", "M", "M", "G", "V", "S", "D"].forEach(x => cal += `<span>${x}</span>`);
+        cal += `</div><div class="grid grid-cols-7 gap-2 text-center">`;
 
-        // Filtra prenotazioni e blocchi orari per la data scelta
-        const dateBookings = existingBookings.filter(b => b.date === selectedDate);
-        const dateBlocks = blockedSlotsList.filter(b => b.date === selectedDate && b.type === 'slot');
+        for (let i = 0; i < first; i++) cal += `<span></span>`;
+        for (let d = 1; d <= dim; d++) {
+            const k = y + "-" + pad(mo + 1) + "-" + pad(d);
+            const isDisabled = k < td;
+            const isSelected = k === sel;
+            cal += `<button type="button" class="py-2 rounded-lg text-sm transition ${isSelected ? 'bg-amber-600 text-stone-950 font-bold' : 'bg-stone-950 hover:border-amber-400 border border-stone-800'} ${isDisabled ? 'opacity-30 cursor-not-allowed line-through' : ''}" ${isDisabled ? "disabled" : ""} onclick="window.pickDate('${k}')">${d}</button>`;
+        }
+        cal += `</div>`;
 
-        baseSlots.forEach(slot => {
-            let isOccupied = isDayBlocked;
+        let h = `
+            <div class="flex justify-between items-center mb-4">
+                <button type="button" onclick="window.moveMonth(-1)" class="px-3 py-1 bg-stone-950 border border-stone-800 rounded hover:border-amber-400">‹</button>
+                <b class="font-serif capitalize text-amber-400">${mon.toLocaleDateString("it-IT", { month: "long", year: "numeric" })}</b>
+                <button type="button" onclick="window.moveMonth(1)" class="px-3 py-1 bg-stone-950 border border-stone-800 rounded hover:border-amber-400">›</button>
+            </div>
+            ${cal}`;
 
-            // Controlla se lo slot specifico è bloccato dal Maestro
-            if (!isOccupied && dateBlocks.some(b => b.time === slot)) {
-                isOccupied = true;
+        if (sel) {
+            h += `<div class="mt-6 pt-6 border-t border-stone-800 space-y-4">
+                <p class="text-sm font-semibold text-amber-400">Data selezionata: ${it(sel)}</p>
+                
+                <div>
+                    <label class="block text-xs text-stone-400 mb-1">Durata della Prova</label>
+                    <select id="widget-duration" onchange="window.setDuration(this.value)" class="w-full bg-stone-950 border border-stone-800 rounded-lg px-3 py-2 text-stone-200 text-sm">
+                        <option value="30" ${durationMinutes === 30 ? 'selected' : ''}>30 minuti</option>
+                        <option value="60" ${durationMinutes === 60 ? 'selected' : ''}>60 minuti (1 ora)</option>
+                        <option value="90" ${durationMinutes === 90 ? 'selected' : ''}>90 minuti</option>
+                        <option value="120" ${durationMinutes === 120 ? 'selected' : ''}>120 minuti (2 ore)</option>
+                    </select>
+                </div>
+
+                <div>
+                    <label class="block text-xs text-stone-400 mb-2">Orari Disponibili</label>
+                    <div class="grid grid-cols-3 sm:grid-cols-4 gap-2">`;
+            
+            let anyAvailable = false;
+            getAvailableSlots().forEach(([t, ok]) => {
+                if (ok) anyAvailable = true;
+                const isSelectedTime = start === t;
+                h += `<button type="button" class="py-2 rounded-lg text-xs font-medium border transition ${isSelectedTime ? 'bg-amber-600 text-stone-950 font-bold' : ok ? 'bg-stone-950 border-stone-800 hover:border-amber-400 text-stone-300' : 'bg-stone-950 border-stone-900 text-stone-700 line-through cursor-not-allowed'}" ${ok ? '' : 'disabled'} onclick="window.pickTime(${t})">${hm(t)}</button>`;
+            });
+            h += `</div>`;
+            if (!anyAvailable) h += `<p class="text-xs text-stone-500 mt-2">Nessun orario disponibile per questa durata in questo giorno.</p>`;
+            h += `</div>`;
+
+            if (start !== null) {
+                h += `
+                    <div class="space-y-3 pt-4 border-t border-stone-800">
+                        <p class="text-xs font-semibold text-amber-400">Inserisci i tuoi dati</p>
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                            <input id="w-name" placeholder="Nome *" class="w-full bg-stone-950 border border-stone-800 rounded-lg px-3 py-2 text-sm text-stone-200">
+                            <input id="w-surname" placeholder="Cognome *" class="w-full bg-stone-950 border border-stone-800 rounded-lg px-3 py-2 text-sm text-stone-200">
+                        </div>
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                            <input id="w-instrument" placeholder="Strumento / Voce *" class="w-full bg-stone-950 border border-stone-800 rounded-lg px-3 py-2 text-sm text-stone-200">
+                            <input id="w-piece" placeholder="Brano in prova *" class="w-full bg-stone-950 border border-stone-800 rounded-lg px-3 py-2 text-sm text-stone-200">
+                        </div>
+                        <p class="text-red-400 text-xs">${err}</p>
+                        <button type="button" id="w-go" onclick="window.submitWidgetBooking()" class="w-full py-3 bg-amber-600 text-stone-950 font-semibold rounded-lg hover:bg-amber-500 text-sm">Conferma Prenotazione (${hm(start)} - ${hm(start + durationMinutes)})</button>
+                    </div>`;
             }
+            h += `</div>`;
+        }
 
-            // Controlla se lo slot è occupato da prenotazioni esistenti
-            if (!isOccupied) {
-                dateBookings.forEach(b => {
-                    const bTimeMinutes = timeToMinutes(b.time);
-                    const slotMinutes = timeToMinutes(slot);
-                    const bEndMinutes = bTimeMinutes + b.duration;
-                    if (slotMinutes >= bTimeMinutes && slotMinutes < bEndMinutes) {
-                        isOccupied = true;
-                    }
-                });
-            }
-
-            const btn = document.createElement('button');
-            btn.type = 'button';
-            btn.textContent = slot;
-            btn.className = `py-2.5 rounded-lg border text-sm font-medium transition ${
-                isOccupied 
-                    ? 'bg-stone-950 border-stone-800 text-stone-600 cursor-not-allowed line-through' 
-                    : 'bg-stone-950 gold-border text-stone-300 hover:border-amber-400 hover:text-amber-400'
-            }`;
-
-            if (!isOccupied) {
-                btn.addEventListener('click', () => {
-                    document.querySelectorAll('#slots-grid button').forEach(b => b.classList.remove('bg-amber-600', 'text-stone-950', 'font-bold'));
-                    btn.classList.add('bg-amber-600', 'text-stone-950', 'font-bold');
-                    selectedTime = slot;
-                    bookingForm.classList.remove('hidden');
-                    bookingForm.scrollIntoView({ behavior: 'smooth' });
-                });
-            }
-
-            slotsGrid.appendChild(btn);
-        });
+        appContainer.innerHTML = h;
     }
 
-    function timeToMinutes(timeStr) {
-        const [h, m] = timeStr.split(':').map(Number);
-        return h * 60 + m;
-    }
+    // Funzioni globali per il widget interattivo
+    window.moveMonth = async function(n) {
+        mon.setMonth(mon.getMonth() + n);
+        await renderCalendarWidget();
+    };
 
-    if (dateInput) {
-        dateInput.addEventListener('change', renderSlots);
-        renderSlots();
-    }
+    window.pickDate = async function(k) {
+        sel = k;
+        start = null;
+        err = "";
+        await loadBookingData();
+        await renderCalendarWidget();
+    };
 
-    // Invio form prenotazione
-    if (bookingForm) {
-        bookingForm.addEventListener('submit', async (e) => {
-            e.preventDefault();
-            const payload = {
-                date: selectedDate,
-                time: selectedTime,
-                name: document.getElementById('b-name').value,
-                surname: document.getElementById('b-surname').value,
-                instrument: document.getElementById('b-instrument').value,
-                duration: parseInt(durationSelect.value),
-                piece: document.getElementById('b-piece').value
-            };
+    window.setDuration = function(val) {
+        durationMinutes = parseInt(val);
+        start = null;
+        renderCalendarWidget();
+    };
 
-            try {
-                const res = await fetch('/api/bookings', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(payload)
-                });
-                const json = await res.json();
-                if (json.success) {
-                    alert('Prenotazione effettuata con successo!');
-                    bookingForm.reset();
-                    bookingForm.classList.add('hidden');
-                    renderSlots();
-                } else {
-                    alert('Errore: ' + json.message);
-                }
-            } catch (err) {
-                alert('Errore di connessione al server.');
+    window.pickTime = function(t) {
+        start = t;
+        err = "";
+        renderCalendarWidget();
+    };
+
+    window.resetBooking = async function() {
+        done = null;
+        start = null;
+        sel = null;
+        err = "";
+        await loadBookingData();
+        await renderCalendarWidget();
+    };
+
+    window.submitWidgetBooking = async function() {
+        const name = document.getElementById("w-name")?.value.trim();
+        const surname = document.getElementById("w-surname")?.value.trim();
+        const instrument = document.getElementById("w-instrument")?.value.trim();
+        const piece = document.getElementById("w-piece")?.value.trim();
+
+        if (!name || !surname || !instrument || !piece) {
+            err = "Tutti i campi sono obbligatori.";
+            renderCalendarWidget();
+            return;
+        }
+
+        const btnGo = document.getElementById("w-go");
+        if (btnGo) btnGo.disabled = true;
+
+        const payload = {
+            date: sel,
+            time: hm(start),
+            name,
+            surname,
+            instrument,
+            duration: durationMinutes,
+            piece
+        };
+
+        try {
+            const res = await fetch("/api/bookings", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(payload)
+            });
+            const j = await res.json();
+            if (res.ok) {
+                done = { name, surname, date: sel, start, duration: durationMinutes, instrument };
+                err = "";
+            } else {
+                err = j.message || "Errore durante la prenotazione.";
+                if (res.status === 409) start = null;
             }
-        });
-    }
+        } catch (e) {
+            err = "Errore di connessione al server.";
+        }
+        await loadBookingData();
+        renderCalendarWidget();
+    };
 
     // Sondaggio Anonimo Dettagliato
     const surveyForm = document.getElementById('survey-form');
@@ -257,7 +348,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     blockForm.reset();
                     if (blockTimeWrapper) blockTimeWrapper.classList.remove('hidden');
                     loadAdminData();
-                    renderSlots();
+                    renderCalendarWidget();
                 } else {
                     alert('Errore: ' + json.message);
                 }
@@ -275,7 +366,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const json = await res.json();
             if (json.success) {
                 loadAdminData();
-                renderSlots();
+                renderCalendarWidget();
             } else {
                 alert('Errore durante l\'eliminazione.');
             }
@@ -285,27 +376,29 @@ document.addEventListener('DOMContentLoaded', () => {
     };
 
     async function loadAdminData() {
-        await fetchData();
+        await loadBookingData();
 
         // Carica prenotazioni
         const tbodyB = document.getElementById('admin-bookings-table');
-        tbodyB.innerHTML = '';
-        if (existingBookings.length > 0) {
-            existingBookings.forEach(b => {
-                const tr = document.createElement('tr');
-                tr.className = 'border-b border-stone-800 hover:bg-stone-950/40';
-                tr.innerHTML = `
-                    <td class="p-3">${b.date}</td>
-                    <td class="p-3 font-semibold text-amber-400">${b.time}</td>
-                    <td class="p-3">${b.name} ${b.surname}</td>
-                    <td class="p-3">${b.instrument}</td>
-                    <td class="p-3">${b.duration} min</td>
-                    <td class="p-3 italic">${b.piece}</td>
-                `;
-                tbodyB.appendChild(tr);
-            });
-        } else {
-            tbodyB.innerHTML = `<tr><td colspan="6" class="p-4 text-center text-stone-500">Nessuna prenotazione attiva.</td></tr>`;
+        if (tbodyB) {
+            tbodyB.innerHTML = '';
+            if (existingBookings.length > 0) {
+                existingBookings.forEach(b => {
+                    const tr = document.createElement('tr');
+                    tr.className = 'border-b border-stone-800 hover:bg-stone-950/40';
+                    tr.innerHTML = `
+                        <td class="p-3">${b.date}</td>
+                        <td class="p-3 font-semibold text-amber-400">${b.time}</td>
+                        <td class="p-3">${b.name} ${b.surname}</td>
+                        <td class="p-3">${b.instrument}</td>
+                        <td class="p-3">${b.duration} min</td>
+                        <td class="p-3 italic">${b.piece}</td>
+                    `;
+                    tbodyB.appendChild(tr);
+                });
+            } else {
+                tbodyB.innerHTML = `<tr><td colspan="6" class="p-4 text-center text-stone-500">Nessuna prenotazione attiva.</td></tr>`;
+            }
         }
 
         // Carica sondaggi dettagliati
@@ -313,22 +406,24 @@ document.addEventListener('DOMContentLoaded', () => {
             const resS = await fetch('/api/surveys');
             const jsonS = await resS.json();
             const tbodyS = document.getElementById('admin-surveys-table');
-            tbodyS.innerHTML = '';
-            if (jsonS.success && jsonS.data.length > 0) {
-                jsonS.data.forEach(s => {
-                    const tr = document.createElement('tr');
-                    tr.className = 'border-b border-stone-800 hover:bg-stone-950/40';
-                    tr.innerHTML = `
-                        <td class="p-3 text-xs">${new Date(s.createdAt).toLocaleDateString()}</td>
-                        <td class="p-3">Punt: ${s.puntualita}/5<br>Prep: ${s.preparazione}/5<br>Fless: ${s.flessibilita}/5</td>
-                        <td class="p-3">Sintonia: ${s.sintonia}<br>Supporto: ${s.supporto}</td>
-                        <td class="p-3">Soddisfazione: ${s.soddisfazione}<br>Disp: ${s.disponibilita}/5<br>Consiglierebbe: ${s.raccomandazione}</td>
-                        <td class="p-3 italic text-stone-400 max-w-xs">${s.commenti || 'Nessun commento'}</td>
-                    `;
-                    tbodyS.appendChild(tr);
-                });
-            } else {
-                tbodyS.innerHTML = `<tr><td colspan="5" class="p-4 text-center text-stone-500">Nessuna risposta al sondaggio registrata.</td></tr>`;
+            if (tbodyS) {
+                tbodyS.innerHTML = '';
+                if (jsonS.success && jsonS.data.length > 0) {
+                    jsonS.data.forEach(s => {
+                        const tr = document.createElement('tr');
+                        tr.className = 'border-b border-stone-800 hover:bg-stone-950/40';
+                        tr.innerHTML = `
+                            <td class="p-3 text-xs">${new Date(s.createdAt).toLocaleDateString()}</td>
+                            <td class="p-3">Punt: ${s.puntualita}/5<br>Prep: ${s.preparazione}/5<br>Fless: ${s.flessibilita}/5</td>
+                            <td class="p-3">Sintonia: ${s.sintonia}<br>Supporto: ${s.supporto}</td>
+                            <td class="p-3">Soddisfazione: ${s.soddisfazione}<br>Disp: ${s.disponibilita}/5<br>Consiglierebbe: ${s.raccomandazione}</td>
+                            <td class="p-3 italic text-stone-400 max-w-xs">${s.commenti || 'Nessun commento'}</td>
+                        `;
+                        tbodyS.appendChild(tr);
+                    });
+                } else {
+                    tbodyS.innerHTML = `<tr><td colspan="5" class="p-4 text-center text-stone-500">Nessuna risposta al sondaggio registrata.</td></tr>`;
+                }
             }
         } catch (e) {
             console.error(e);
@@ -357,4 +452,7 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         }
     }
+
+    // Inizializzazione Calendario Widget all'avvio
+    loadBookingData().then(() => renderCalendarWidget());
 });
