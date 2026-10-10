@@ -358,7 +358,7 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // Funzione globale per eliminare un blocco
+    // Funzioni globali per eliminare blocchi, prenotazioni e sondaggi
     window.deleteBlock = async function(id) {
         if (!confirm('Vuoi rimuovere questo blocco e rendere nuovamente disponibile l\'orario?')) return;
         try {
@@ -375,10 +375,41 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     };
 
+    window.deleteBooking = async function(id) {
+        if (!confirm('Vuoi eliminare questa prenotazione?')) return;
+        try {
+            const res = await fetch(`/api/bookings/${id}`, { method: 'DELETE' });
+            const json = await res.json();
+            if (json.success) {
+                loadAdminData();
+                renderCalendarWidget();
+            } else {
+                alert('Errore durante l\'eliminazione della prenotazione.');
+            }
+        } catch (e) {
+            alert('Errore di connessione.');
+        }
+    };
+
+    window.deleteSurvey = async function(id) {
+        if (!confirm('Vuoi eliminare questa risposta al sondaggio?')) return;
+        try {
+            const res = await fetch(`/api/surveys/${id}`, { method: 'DELETE' });
+            const json = await res.json();
+            if (json.success) {
+                loadAdminData();
+            } else {
+                alert('Errore durante l\'eliminazione del sondaggio.');
+            }
+        } catch (e) {
+            alert('Errore di connessione.');
+        }
+    };
+
     async function loadAdminData() {
         await loadBookingData();
 
-        // Carica prenotazioni
+        // Carica prenotazioni (con pulsante elimina)
         const tbodyB = document.getElementById('admin-bookings-table');
         if (tbodyB) {
             tbodyB.innerHTML = '';
@@ -393,15 +424,18 @@ document.addEventListener('DOMContentLoaded', () => {
                         <td class="p-3">${b.instrument}</td>
                         <td class="p-3">${b.duration} min</td>
                         <td class="p-3 italic">${b.piece}</td>
+                        <td class="p-3 text-right">
+                            <button onclick="deleteBooking('${b.id}')" class="px-3 py-1 bg-red-900/40 border border-red-700 text-red-300 rounded text-xs hover:bg-red-900">Elimina</button>
+                        </td>
                     `;
                     tbodyB.appendChild(tr);
                 });
             } else {
-                tbodyB.innerHTML = `<tr><td colspan="6" class="p-4 text-center text-stone-500">Nessuna prenotazione attiva.</td></tr>`;
+                tbodyB.innerHTML = `<tr><td colspan="7" class="p-4 text-center text-stone-500">Nessuna prenotazione attiva.</td></tr>`;
             }
         }
 
-        // Carica sondaggi dettagliati
+        // Carica sondaggi dettagliati (con pulsante elimina)
         try {
             const resS = await fetch('/api/surveys');
             const jsonS = await resS.json();
@@ -418,11 +452,14 @@ document.addEventListener('DOMContentLoaded', () => {
                             <td class="p-3">Sintonia: ${s.sintonia}<br>Supporto: ${s.supporto}</td>
                             <td class="p-3">Soddisfazione: ${s.soddisfazione}<br>Disp: ${s.disponibilita}/5<br>Consiglierebbe: ${s.raccomandazione}</td>
                             <td class="p-3 italic text-stone-400 max-w-xs">${s.commenti || 'Nessun commento'}</td>
+                            <td class="p-3 text-right">
+                                <button onclick="deleteSurvey('${s.id}')" class="px-3 py-1 bg-red-900/40 border border-red-700 text-red-300 rounded text-xs hover:bg-red-900">Elimina</button>
+                            </td>
                         `;
                         tbodyS.appendChild(tr);
                     });
                 } else {
-                    tbodyS.innerHTML = `<tr><td colspan="5" class="p-4 text-center text-stone-500">Nessuna risposta al sondaggio registrata.</td></tr>`;
+                    tbodyS.innerHTML = `<tr><td colspan="6" class="p-4 text-center text-stone-500">Nessuna risposta al sondaggio registrata.</td></tr>`;
                 }
             }
         } catch (e) {
