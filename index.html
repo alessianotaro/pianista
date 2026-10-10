@@ -73,6 +73,7 @@
             </div>
         </section>
 
+
         <!-- CURRICULUM SECTION -->
         <section id="curriculum" class="py-20 bg-stone-950/60 border-t gold-border">
             <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -82,8 +83,8 @@
                 </div>
                 
                 <div class="relative bg-stone-900/60 border gold-border p-6 sm:p-10 rounded-2xl shadow-xl">
-                    <!-- Contenitore con altezza bloccata su mobile e transizione -->
-                    <div id="curriculum-container" class="space-y-6 text-stone-300 leading-relaxed overflow-hidden transition-all duration-500 max-h-52 sm:max-h-none relative">
+                    <!-- Contenitore con altezza iniziale bloccata via stile inline per la versione mobile -->
+                    <div id="curriculum-container" class="space-y-6 text-stone-300 leading-relaxed overflow-hidden transition-all duration-500 relative" style="max-height: 200px;">
                         <p>
                             <strong>Daniele Notaro</strong> intraprende gli studi musicali sotto la guida della professoressa Carmela Leone, diplomandosi con il massimo dei voti presso il Conservatorio "Arcangelo Corelli" di Messina. La sua formazione si è arricchita grazie all'ammissione come allievo effettivo alle prestigiose masterclass del M° Lazar Berman (1995) e, successivamente, del M° Sergio Perticaroli (2000 e 2001), esperienze che hanno contribuito a definire la sua maturità tecnica e interpretativa.
                         </p>
@@ -98,7 +99,7 @@
                         </p>
 
                         <!-- Sfumatura visiva in basso quando è chiuso (visibile solo su mobile) -->
-                        <div id="curriculum-fade" class="absolute bottom-0 left-0 right-0 h-24 bg-gradient-to-t from-[#12100e] to-transparent sm:hidden pointer-events-none"></div>
+                        <div id="curriculum-fade" class="absolute bottom-0 left-0 right-0 h-24 bg-gradient-to-t from-[#12100e] to-transparent pointer-events-none sm:hidden"></div>
                     </div>
 
                     <!-- Pulsante Leggi Tutto (Visibile solo su mobile) -->
@@ -113,7 +114,6 @@
                 </div>
             </div>
         </section>
-
 
         <!-- GALLERIA FOTOGRAFICA -->
         <section id="galleria" class="py-20 bg-stone-950/40 border-t gold-border">
