@@ -24,6 +24,33 @@ document.addEventListener('DOMContentLoaded', () => {
     }
     
 
+    // Curriculum "Leggi tutto" dinamico per mobile
+    const curriculumContainer = document.getElementById('curriculum-container');
+    const toggleCurriculumBtn = document.getElementById('toggle-curriculum-btn');
+    const curriculumFade = document.getElementById('curriculum-fade');
+    const curriculumArrow = document.getElementById('curriculum-arrow');
+    const toggleText = document.getElementById('toggle-text');
+
+    if (toggleCurriculumBtn && curriculumContainer) {
+        let isExpanded = false;
+        toggleCurriculumBtn.addEventListener('click', () => {
+            isExpanded = !isExpanded;
+            if (isExpanded) {
+                // Espande dinamicamente in base all'altezza effettiva del testo
+                curriculumContainer.style.maxHeight = curriculumContainer.scrollHeight + 'px';
+                if (curriculumFade) curriculumFade.classList.add('hidden');
+                toggleText.textContent = 'Riduci';
+                curriculumArrow.style.transform = 'rotate(180deg)';
+            } else {
+                // Ritorna all'altezza iniziale chiusa (~13rem)
+                curriculumContainer.style.maxHeight = '13rem';
+                if (curriculumFade) curriculumFade.classList.remove('hidden');
+                toggleText.textContent = 'Leggi tutto';
+                curriculumArrow.style.transform = 'rotate(0deg)';
+            }
+        });
+    }
+
     // Gestione Calendario Prenotazioni Integrato & Blocchi
     const appContainer = document.getElementById('booking-app');
     let mon = new Date(), sel = null, start = null, durationMinutes = 60, existingBookings = [], blockedSlotsList = [], err = "", done = null;

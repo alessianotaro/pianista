@@ -81,19 +81,35 @@
                     <p class="text-stone-400 max-w-xl mx-auto">Il percorso artistico, i premi e l'attività didattica e concertistica.</p>
                 </div>
                 
-                <div class="space-y-8 text-stone-300 leading-relaxed bg-stone-900/60 border gold-border p-6 sm:p-10 rounded-2xl shadow-xl">
-                    <p>
-                        <strong>Daniele Notaro</strong> intraprende gli studi musicali sotto la guida della professoressa Carmela Leone, diplomandosi con il massimo dei voti presso il Conservatorio "Arcangelo Corelli" di Messina. La sua formazione si è arricchita grazie all'ammissione come allievo effettivo alle prestigiose masterclass del M° Lazar Berman (1995) e, successivamente, del M° Sergio Perticaroli (2000 e 2001), esperienze che hanno contribuito a definire la sua maturità tecnica e interpretativa.
-                    </p>
-                    <p>
-                        Nel corso degli anni ha partecipato a numerosi concorsi e rassegne musicali, distinguendosi sia nella musica da camera sia nella sezione solistica. Tra i riconoscimenti cameristici più significativi figurano il 1° Premio Assoluto alla V Rassegna Musicale "R. Schumann" di Messina (2001), il 1º Premio Assoluto al 6° Concorso Nazionale "Premio Città di Brindisi" (2001), il 1° Premio alla IV Rassegna "R. Schumann" (2000), oltre ai podi ottenuti ai concorsi "G. Campochiaro" di Pedara, "Albanese" di Caccamo e al Concorso Internazionale "Magma" di Sant'Agata Li Battiati. In ambito solistico ha conquistato il 1º Premio al IV Concorso Internazionale "Città di Barcellona Pozzo di Gotto" e il 3º Premio al XXI Concorso Internazionale Pianistico "A.M.A. Calabria" di Lamezia Terme.
-                    </p>
-                    <p>
-                        Grazie al contributo dei maestri A. Cannavale, L. Paolicelli e A. Bonaccorso, Daniele ha sviluppato un profondo interesse per la musica da camera, esibendosi in qualità di pianista accompagnatore al Festival Cornistico dell'Etna e nelle masterclass di artisti di fama internazionale, tra cui Alessio Allegrini, Andrea Cesari, Piero Mangano, Andrea Lucchi, Salvatore Palmeri, Vincenzo Paci, Gianluigi Caldarola, Angelo Bonaccorso, Hervé Joulain e Guglielmo Pellarin. Ha inoltre lavorato con direttori quali Franco Cesarini, Giuseppe Ratti e Andrea Loss, e con cantanti del calibro di Desirée Rancatore e Daniela Schillaci.
-                    </p>
-                    <p>
-                        Svolge un'intensa attività come maestro accompagnatore nelle classi di strumenti a fiato, violino e canto presso il Conservatorio "A. Corelli" di Messina, dove mette a disposizione la sua esperienza e la sua sensibilità musicale a supporto delle nuove generazioni di musicisti.
-                    </p>
+                <div class="relative bg-stone-900/60 border gold-border p-6 sm:p-10 rounded-2xl shadow-xl">
+                    <!-- Contenitore con altezza bloccata su mobile e transizione -->
+                    <div id="curriculum-container" class="space-y-6 text-stone-300 leading-relaxed overflow-hidden transition-all duration-500 max-h-52 sm:max-h-none relative">
+                        <p>
+                            <strong>Daniele Notaro</strong> intraprende gli studi musicali sotto la guida della professoressa Carmela Leone, diplomandosi con il massimo dei voti presso il Conservatorio "Arcangelo Corelli" di Messina. La sua formazione si è arricchita grazie all'ammissione come allievo effettivo alle prestigiose masterclass del M° Lazar Berman (1995) e, successivamente, del M° Sergio Perticaroli (2000 e 2001), esperienze che hanno contribuito a definire la sua maturità tecnica e interpretativa.
+                        </p>
+                        <p>
+                            Nel corso degli anni ha partecipato a numerosi concorsi e rassegne musicali, distinguendosi sia nella musica da camera sia nella sezione solistica. Tra i riconoscimenti cameristici più significativi figurano il 1° Premio Assoluto alla V Rassegna Musicale "R. Schumann" di Messina (2001), il 1º Premio Assoluto al 6° Concorso Nazionale "Premio Città di Brindisi" (2001), il 1° Premio alla IV Rassegna "R. Schumann" (2000), oltre ai podi ottenuti ai concorsi "G. Campochiaro" di Pedara, "Albanese" di Caccamo e al Concorso Internazionale "Magma" di Sant'Agata Li Battiati. In ambito solistico ha conquistato il 1º Premio al IV Concorso Internazionale "Città di Barcellona Pozzo di Gotto" e il 3º Premio al XXI Concorso Internazionale Pianistico "A.M.A. Calabria" di Lamezia Terme.
+                        </p>
+                        <p>
+                            Grazie al contributo dei maestri A. Cannavale, L. Paolicelli e A. Bonaccorso, Daniele ha sviluppato un profondo interesse per la musica da camera, esibendosi in qualità di pianista accompagnatore al Festival Cornistico dell'Etna e nelle masterclass di artisti di fama internazionale, tra cui Alessio Allegrini, Andrea Cesari, Piero Mangano, Andrea Lucchi, Salvatore Palmeri, Vincenzo Paci, Gianluigi Caldarola, Angelo Bonaccorso, Hervé Joulain e Guglielmo Pellarin. Ha inoltre lavorato con direttori quali Franco Cesarini, Giuseppe Ratti e Andrea Loss, e con cantanti del calibro di Desirée Rancatore e Daniela Schillaci.
+                        </p>
+                        <p>
+                            Svolge un'intensa attività come maestro accompagnatore nelle classi di strumenti a fiato, violino e canto presso il Conservatorio "A. Corelli" di Messina, dove mette a disposizione la sua esperienza e la sua sensibilità musicale a supporto delle nuove generazioni di musicisti.
+                        </p>
+
+                        <!-- Sfumatura visiva in basso quando è chiuso (visibile solo su mobile) -->
+                        <div id="curriculum-fade" class="absolute bottom-0 left-0 right-0 h-24 bg-gradient-to-t from-[#12100e] to-transparent sm:hidden pointer-events-none"></div>
+                    </div>
+
+                    <!-- Pulsante Leggi Tutto (Visibile solo su mobile) -->
+                    <div class="text-center mt-6 sm:hidden">
+                        <button type="button" id="toggle-curriculum-btn" class="inline-flex items-center gap-2 px-5 py-2.5 bg-stone-950 border gold-border text-amber-400 rounded-lg text-sm font-medium hover:bg-stone-800 transition">
+                            <span id="toggle-text">Leggi tutto</span>
+                            <svg id="curriculum-arrow" class="w-4 h-4 transition-transform duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                            </svg>
+                        </button>
+                    </div>
                 </div>
             </div>
         </section>
