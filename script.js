@@ -8,14 +8,21 @@ document.addEventListener('DOMContentLoaded', () => {
             mobileMenu.classList.toggle('hidden');
         });
 
-        // Chiudi il menu quando si clicca su qualsiasi link all'interno
-        const mobileLinks = mobileMenu.querySelectorAll('a');
-        mobileLinks.forEach(link => {
-            link.addEventListener('click', () => {
-                mobileMenu.classList.add('hidden');
+        mobileMenu.querySelectorAll('a').forEach(link => {
+            link.addEventListener('click', (e) => {
+                const targetId = link.getAttribute('href');
+                if (targetId && targetId.startsWith('#')) {
+                    e.preventDefault();
+                    mobileMenu.classList.add('hidden');
+                    const targetElement = document.querySelector(targetId);
+                    if (targetElement) {
+                        targetElement.scrollIntoView({ behavior: 'smooth' });
+                    }
+                }
             });
         });
     }
+    
 
     // Gestione Calendario Prenotazioni Integrato & Blocchi
     const appContainer = document.getElementById('booking-app');
