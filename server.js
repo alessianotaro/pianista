@@ -53,7 +53,7 @@ app.post('/api/bookings', (req, res) => {
     res.status(201).json({ success: true, message: 'Prenotazione prova registrata con successo', data: newBooking });
 });
 
-// DELETE: Elimina una prenotazione (riservato admin)
+// DELETE: Elimina una prenotazione specifica (riservato admin)
 app.delete('/api/bookings/:id', (req, res) => {
     const { id } = req.params;
     const initialLength = bookings.length;
@@ -73,7 +73,7 @@ app.delete('/api/bookings', (req, res) => {
 });
 
 
-// --- API ROTTE SONDAGGI (AGGIORNATE) ---
+// --- API ROTTE SONDAGGI ---
 
 // GET: Ottieni risposte sondaggio
 app.get('/api/surveys', (req, res) => {
@@ -100,6 +100,19 @@ app.post('/api/surveys', (req, res) => {
 
     surveys.push(newSurvey);
     res.status(201).json({ success: true, message: 'Risposte al sondaggio salvate in forma anonima.', data: newSurvey });
+});
+
+// DELETE: Elimina un sondaggio specifico (riservato admin)
+app.delete('/api/surveys/:id', (req, res) => {
+    const { id } = req.params;
+    const initialLength = surveys.length;
+    surveys = surveys.filter(s => s.id !== id);
+
+    if (surveys.length === initialLength) {
+        return res.status(404).json({ success: false, message: 'Sondaggio non trovato.' });
+    }
+
+    res.json({ success: true, message: 'Sondaggio eliminato con successo.' });
 });
 
 // DELETE: Resetta sondaggi
