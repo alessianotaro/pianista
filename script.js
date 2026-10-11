@@ -63,6 +63,7 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
+
     // 3. Gestione Calendario Prenotazioni Integrato & Blocchi
     const appContainer = document.getElementById('booking-app');
     let mon = new Date(), sel = null, start = null, durationMinutes = 60, existingBookings = [], blockedSlotsList = [], err = "", done = null;
@@ -87,7 +88,17 @@ document.addEventListener('DOMContentLoaded', () => {
         return h * 60 + m;
     }
 
+    // Funzione per verificare se un giorno è Sabato (6) o Domenica (0)
+    function isWeekend(dateStr) {
+        const d = new Date(dateStr + "T12:00");
+        const day = d.getDay();
+        return day === 0 || day === 6;
+    }
+
     function free(t, dur) {
+        // Sabato e Domenica sempre chiusi
+        if (isWeekend(sel)) return false;
+
         const isDayBlocked = blockedSlotsList.some(b => b.date === sel && b.type === 'day');
         if (isDayBlocked) return false;
 
@@ -110,6 +121,8 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function getAvailableSlots() {
+        if (isWeekend(sel)) return [];
+
         const now = new Date(), today = ds(now) === sel;
         const currentMinutes = now.getHours() * 60 + now.getMinutes();
         const r = [];
@@ -125,7 +138,9 @@ document.addEventListener('DOMContentLoaded', () => {
             return slots;
         }
 
+        // Mattina: 09:00 - 13:00
         const morningSlots = generateDynamicSlots(9, 0, 13, 0);
+        // Pomeriggio: 14:30 - 16:30
         const afternoonSlots = generateDynamicSlots(14, 30, 16, 30);
 
         function processSlots(slots, maxEndHour, maxEndMin) {
@@ -190,9 +205,11 @@ document.addEventListener('DOMContentLoaded', () => {
         for (let i = 0; i < first; i++) cal += `<span></span>`;
         for (let d = 1; d <= dim; d++) {
             const k = y + "-" + pad(mo + 1) + "-" + pad(d);
-            const isDisabled = k < td;
+            const isWeekendDay = isWeekend(k);
+            const isDisabled = k < td || isWeekendDay;
             const isSelected = k === sel;
-            cal += `<button type="button" class="py-2 rounded-lg text-sm transition ${isSelected ? 'bg-amber-600 text-stone-950 font-bold' : 'bg-stone-950 hover:border-amber-400 border border-stone-800'} ${isDisabled ? 'opacity-30 cursor-not-allowed line-through' : ''}" ${isDisabled ? "disabled" : ""} onclick="window.pickDate('${k}')">${d}</button>`;
+            
+            cal += `<button type="button" class="py-2 rounded-lg text-sm transition ${isSelected ? 'bg-amber-600 text-stone-950 font-bold' : isWeekendDay ? 'bg-stone-950/20 text-stone-700 cursor-not-allowed' : 'bg-stone-950 hover:border-amber-400 border border-stone-800'} ${isDisabled && !isWeekendDay ? 'opacity-30 cursor-not-allowed line-through' : ''}" ${isDisabled ? "disabled" : ""} onclick="window.pickDate('${k}')">${d}</button>`;
         }
         cal += `</div>`;
 
@@ -205,24 +222,25 @@ document.addEventListener('DOMContentLoaded', () => {
             ${cal}`;
 
         if (sel) {
-            // Controlla se l'intera giornata è bloccata e recupera il motivo
             const dayBlock = blockedSlotsList.find(b => b.date === sel && b.type === 'day');
-            
-            // Recupera eventuali blocchi per orari specifici
             const slotBlocks = blockedSlotsList.filter(b => b.date === sel && b.type === 'slot');
 
             h += `<div class="mt-6 pt-6 border-t border-stone-800 space-y-4">
                 <p class="text-sm font-semibold text-amber-400">Data selezionata: ${it(sel)}</p>`;
 
-            // Se l'intera giornata è bloccata, mostra l'avviso e il motivo
-            if (dayBlock) {
+            if (isWeekend(sel)) {
+                h += `
+                    <div class="bg-stone-900 border border-stone-800 p-4 rounded-xl text-center space-y-1">
+                        <p class="text-stone-300 font-medium text-sm">Chiusura settimanale</p>
+                        <p class="text-stone-500 text-xs italic">Il sabato e la domenica lo studio è chiuso.</p>
+                    </div>`;
+            } else if (dayBlock) {
                 h += `
                     <div class="bg-red-950/40 border border-red-800/60 p-4 rounded-xl text-center space-y-1">
                         <p class="text-red-300 font-semibold text-sm">Giornata non disponibile per le prenotazioni</p>
                         <p class="text-stone-400 text-xs italic">Motivo: ${dayBlock.reason || 'Chiusura straordinaria'}</p>
                     </div>`;
             } else {
-                // Se ci sono orari specifici bloccati nella giornata, mostra l'elenco dei motivi
                 if (slotBlocks.length > 0) {
                     h += `<div class="bg-amber-950/30 border border-amber-800/50 p-3 rounded-xl text-xs space-y-1">
                         <p class="text-amber-300 font-medium">Nota per questa giornata:</p>
@@ -283,7 +301,8 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         appContainer.innerHTML = h;
-    }
+    }    
+    
 
     // Funzioni globali per il widget interattivo
     window.moveMonth = async function(n) {
