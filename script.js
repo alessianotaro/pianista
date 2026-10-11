@@ -33,7 +33,6 @@ document.addEventListener('DOMContentLoaded', () => {
     if (toggleCurriculumBtn && curriculumContainer) {
         let isExpanded = false;
 
-        // Reset per schermi desktop
         function checkScreenSize() {
             if (window.innerWidth >= 640) {
                 curriculumContainer.style.maxHeight = 'none';
@@ -45,7 +44,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         window.addEventListener('resize', checkScreenSize);
-        checkScreenSize(); // Esegui all'avvio
+        checkScreenSize();
 
         toggleCurriculumBtn.addEventListener('click', () => {
             isExpanded = !isExpanded;
@@ -63,7 +62,6 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-
     // 3. Gestione Calendario Prenotazioni Integrato & Blocchi
     const appContainer = document.getElementById('booking-app');
     let mon = new Date(), sel = null, start = null, durationMinutes = 60, existingBookings = [], blockedSlotsList = [], err = "", done = null;
@@ -79,7 +77,6 @@ document.addEventListener('DOMContentLoaded', () => {
         return h * 60 + m;
     }
 
-    // Funzione per verificare se un giorno è Sabato (6) o Domenica (0)
     function isWeekend(dateStr) {
         const d = new Date(dateStr + "T12:00");
         const day = d.getDay();
@@ -87,15 +84,22 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function free(t, dur) {
-        // Sabato e Domenica sempre chiusi
         if (isWeekend(sel)) return false;
 
         const isDayBlocked = blockedSlotsList.some(b => b.date === sel && b.type === 'day');
         if (isDayBlocked) return false;
 
+        // Gestione blocchi a fascia oraria con durata in ore
         const dateBlocks = blockedSlotsList.filter(b => b.date === sel && b.type === 'slot');
-        const slotTimeStr = hm(t);
-        if (dateBlocks.some(b => b.time === slotTimeStr)) return false;
+        for (let block of dateBlocks) {
+            const blockStartMinutes = timeToMinutes(block.time);
+            const blockDurationMinutes = (block.hours || 1) * 60;
+            const blockEndMinutes = blockStartMinutes + blockDurationMinutes;
+
+            if (t < blockEndMinutes && t + dur > blockStartMinutes) {
+                return false;
+            }
+        }
 
         // Controllo sovrapposizione con Pausa Pranzo (14:00 - 14:30)
         const breakStart = 14 * 60;
@@ -111,7 +115,31 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    
+    function getAvailableSlots() {
+        if (isWeekend(sel)) return [];
+
+        const now = new Date(), today = ds(now) === sel;
+        const currentMinutes = now.getHours() * 60 + now.getMinutes();
+        const r = [];
+
+        // Orari fissi richiesti
+        const allowedSlots = [
+            "09:00", "10:00", "11:00", "12:00", "13:00", 
+            "14:30", "15:30", "16:30"
+        ];
+
+        allowedSlots.forEach(slotStr => {
+            const t = timeToMinutes(slotStr);
+            const past = today && t <= currentMinutes;
+            if (!past && free(t, 60)) {
+                r.push([t, true]);
+            } else {
+                r.push([t, false]);
+            }
+        });
+
+        return r;
+    }
 
     async function loadBookingData() {
         try {
@@ -191,13 +219,13 @@ document.addEventListener('DOMContentLoaded', () => {
                         <p class="text-amber-300 font-medium">Nota per questa giornata:</p>
                         <ul class="list-disc list-inside text-stone-400 space-y-0.5">`;
                     slotBlocks.forEach(sb => {
-                        h += `<li>Ore <b>${sb.time}</b> non disponibile: <i>${sb.reason || 'Riservato'}</i></li>`;
+                        const blockHours = sb.hours || 1;
+                        h += `<li>Dalle ore <b>${sb.time}</b> (${blockHours} ${blockHours === 1 ? 'ora' : 'ore'}) non disponibile: <i>${sb.reason || 'Riservato'}</i></li>`;
                     });
                     h += `</ul></div>`;
                 }
 
                 h += `
-                <!-- Durata fissa e nota informativa -->
                 <div class="bg-stone-950/40 p-3 rounded-xl border border-stone-800 flex justify-between items-center text-xs">
                     <span class="text-stone-300">Durata della prova: <b>1 ora</b></span>
                     <span class="text-stone-500 italic">Per durate superiori, contattare il docente</span>
@@ -217,6 +245,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 if (!anyAvailable) h += `<p class="text-xs text-stone-500 mt-2">Nessun orario disponibile per questo giorno.</p>`;
                 h += `</div>`;
 
+                // Selezionato l'orario, mostra il form dati (correttamente esterno ai controlli di blocco)
                 if (start !== null) {
                     h += `
                         <div class="space-y-3 pt-4 border-t border-stone-800">
@@ -239,7 +268,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
         appContainer.innerHTML = h;
     }
-    
 
     // Funzioni globali per il widget interattivo
     window.moveMonth = async function(n) {
@@ -253,14 +281,6 @@ document.addEventListener('DOMContentLoaded', () => {
         err = "";
         await loadBookingData();
         await renderCalendarWidget();
-    };
-
-    window.setDurationRange = function(val) {
-        durationMinutes = parseInt(val);
-        start = null;
-        const label = document.getElementById('duration-label');
-        if (label) label.textContent = formatDurationLabel(durationMinutes);
-        renderCalendarWidget();
     };
 
     window.pickTime = function(t) {
@@ -299,7 +319,7 @@ document.addEventListener('DOMContentLoaded', () => {
             name,
             surname,
             instrument,
-            duration: durationMinutes,
+            duration: 60,
             piece
         };
 
@@ -311,7 +331,7 @@ document.addEventListener('DOMContentLoaded', () => {
             });
             const j = await res.json();
             if (res.ok) {
-                done = { name, surname, date: sel, start, duration: durationMinutes, instrument };
+                done = { name, surname, date: sel, start, duration: 60, instrument };
                 err = "";
             } else {
                 err = j.message || "Errore durante la prenotazione.";
@@ -399,28 +419,34 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // Gestione visibilità selettore orario nel form blocchi admin
+    // Gestione visibilità selettore orario e ore nel form blocchi admin
     const blockTypeSelect = document.getElementById('block-type');
     const blockTimeWrapper = document.getElementById('block-time-wrapper');
+    const blockDurationWrapper = document.getElementById('block-duration-wrapper');
+
     if (blockTypeSelect) {
         blockTypeSelect.addEventListener('change', () => {
             if (blockTypeSelect.value === 'day') {
-                blockTimeWrapper.classList.add('hidden');
+                if (blockTimeWrapper) blockTimeWrapper.classList.add('hidden');
+                if (blockDurationWrapper) blockDurationWrapper.classList.add('hidden');
             } else {
-                blockTimeWrapper.classList.remove('hidden');
+                if (blockTimeWrapper) blockTimeWrapper.classList.remove('hidden');
+                if (blockDurationWrapper) blockDurationWrapper.classList.remove('hidden');
             }
         });
     }
 
-    // Invio form blocco admin
+    // Invio form blocco admin (supporta tipo slot e ore)
     const blockForm = document.getElementById('block-form');
     if (blockForm) {
         blockForm.addEventListener('submit', async (e) => {
             e.preventDefault();
+            const type = document.getElementById('block-type').value;
             const payload = {
-                type: document.getElementById('block-type').value,
+                type: type,
                 date: document.getElementById('block-date').value,
-                time: document.getElementById('block-type').value === 'slot' ? document.getElementById('block-time').value : null,
+                time: type === 'slot' ? document.getElementById('block-time').value : null,
+                hours: type === 'slot' ? parseInt(document.getElementById('block-hours').value || 1) : null,
                 reason: document.getElementById('block-reason')?.value.trim() || 'Chiuso'
             };
 
@@ -435,6 +461,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     alert('Periodo bloccato con successo.');
                     blockForm.reset();
                     if (blockTimeWrapper) blockTimeWrapper.classList.remove('hidden');
+                    if (blockDurationWrapper) blockDurationWrapper.classList.remove('hidden');
                     loadAdminData();
                     renderCalendarWidget();
                 } else {
@@ -446,7 +473,6 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // Funzioni globali per eliminare blocchi, prenotazioni e sondaggi
     window.deleteBlock = async function(id) {
         if (!confirm('Vuoi rimuovere questo blocco e rendere nuovamente disponibile l\'orario?')) return;
         try {
@@ -497,7 +523,6 @@ document.addEventListener('DOMContentLoaded', () => {
     async function loadAdminData() {
         await loadBookingData();
 
-        // Carica prenotazioni (con pulsante elimina)
         const tbodyB = document.getElementById('admin-bookings-table');
         if (tbodyB) {
             tbodyB.innerHTML = '';
@@ -523,7 +548,6 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         }
 
-        // Carica sondaggi dettagliati (con pulsante elimina)
         try {
             const resS = await fetch('/api/surveys');
             const jsonS = await resS.json();
@@ -554,18 +578,19 @@ document.addEventListener('DOMContentLoaded', () => {
             console.error(e);
         }
 
-        // Carica blocchi attivi nella tabella admin
         const tbodyBl = document.getElementById('admin-blocks-table');
         if (tbodyBl) {
             tbodyBl.innerHTML = '';
             if (blockedSlotsList.length > 0) {
                 blockedSlotsList.forEach(b => {
+                    const hours = b.hours || 1;
+                    const timeDisplay = b.time ? `${b.time} (${hours} ${hours === 1 ? 'ora' : 'ore'})` : '-';
                     const tr = document.createElement('tr');
                     tr.className = 'border-b border-stone-800 hover:bg-stone-950/40';
                     tr.innerHTML = `
-                        <td class="p-2.5 font-semibold text-amber-400">${b.type === 'day' ? 'Intera Giornata' : 'Orario Specifico'}</td>
+                        <td class="p-2.5 font-semibold text-amber-400">${b.type === 'day' ? 'Intera Giornata' : 'Fascia Oraria'}</td>
                         <td class="p-2.5">${b.date}</td>
-                        <td class="p-2.5">${b.time || '-'}</td>
+                        <td class="p-2.5">${timeDisplay}</td>
                         <td class="p-2.5 italic text-stone-400">${b.reason || 'Chiuso'}</td>
                         <td class="p-2.5 text-right">
                             <button onclick="deleteBlock('${b.id}')" class="px-3 py-1 bg-red-900/40 border border-red-700 text-red-300 rounded text-xs hover:bg-red-900">Rimuovi</button>
@@ -579,6 +604,5 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    // Inizializzazione Calendario Widget all'avvio
     loadBookingData().then(() => renderCalendarWidget());
 });
