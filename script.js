@@ -87,23 +87,15 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function free(t, dur) {
+        // Sabato e Domenica sempre chiusi
         if (isWeekend(sel)) return false;
 
         const isDayBlocked = blockedSlotsList.some(b => b.date === sel && b.type === 'day');
         if (isDayBlocked) return false;
 
-        // Controlla i blocchi a fascia oraria
         const dateBlocks = blockedSlotsList.filter(b => b.date === sel && b.type === 'slot');
-        for (let block of dateBlocks) {
-            const blockStartMinutes = timeToMinutes(block.time);
-            const blockDurationMinutes = (block.hours || 1) * 60; // di default 1 ora se non specificato
-            const blockEndMinutes = blockStartMinutes + blockDurationMinutes;
-
-            // Se la prova si sovrappone al blocco admin, restituisce false
-            if (t < blockEndMinutes && t + dur > blockStartMinutes) {
-                return false;
-            }
-        }
+        const slotTimeStr = hm(t);
+        if (dateBlocks.some(b => b.time === slotTimeStr)) return false;
 
         // Controllo sovrapposizione con Pausa Pranzo (14:00 - 14:30)
         const breakStart = 14 * 60;
@@ -119,33 +111,7 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    function getAvailableSlots() {
-        if (isWeekend(sel)) return [];
-
-        const now = new Date(), today = ds(now) === sel;
-        const currentMinutes = now.getHours() * 60 + now.getMinutes();
-        const r = [];
-
-        // Orari fissi consentiti per la prova da 1 ora
-        const allowedSlots = [
-            "09:00", "10:00", "11:00", "12:00", "13:00", 
-            "14:30", "15:30", "16:30"
-        ];
-
-        allowedSlots.forEach(slotStr => {
-            const t = timeToMinutes(slotStr);
-            const past = today && t <= currentMinutes;
-            
-            // Verifica se lo slot è libero (durata fissa a 60 minuti)
-            if (!past && free(t, 60)) {
-                r.push([t, true]);
-            } else {
-                r.push([t, false]);
-            }
-        });
-
-        return r;
-    }
+    
 
     async function loadBookingData() {
         try {
@@ -434,31 +400,27 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // Gestione visibilità selettore orario nel form blocchi admin
-    const blockForm = document.getElementById('block-form');
+    const blockTypeSelect = document.getElementById('block-type');
     const blockTimeWrapper = document.getElementById('block-time-wrapper');
-    const blockDurationWrapper = document.getElementById('block-duration-wrapper');
-
     if (blockTypeSelect) {
         blockTypeSelect.addEventListener('change', () => {
             if (blockTypeSelect.value === 'day') {
-                if (blockTimeWrapper) blockTimeWrapper.classList.add('hidden');
-                if (blockDurationWrapper) blockDurationWrapper.classList.add('hidden');
+                blockTimeWrapper.classList.add('hidden');
             } else {
-                if (blockTimeWrapper) blockTimeWrapper.classList.remove('hidden');
-                if (blockDurationWrapper) blockDurationWrapper.classList.remove('hidden');
+                blockTimeWrapper.classList.remove('hidden');
             }
         });
     }
 
+    // Invio form blocco admin
+    const blockForm = document.getElementById('block-form');
     if (blockForm) {
         blockForm.addEventListener('submit', async (e) => {
             e.preventDefault();
-            const type = document.getElementById('block-type').value;
             const payload = {
-                type: type,
+                type: document.getElementById('block-type').value,
                 date: document.getElementById('block-date').value,
-                time: type === 'slot' ? document.getElementById('block-time').value : null,
-                hours: type === 'slot' ? parseInt(document.getElementById('block-hours').value) : null,
+                time: document.getElementById('block-type').value === 'slot' ? document.getElementById('block-time').value : null,
                 reason: document.getElementById('block-reason')?.value.trim() || 'Chiuso'
             };
 
@@ -473,7 +435,6 @@ document.addEventListener('DOMContentLoaded', () => {
                     alert('Periodo bloccato con successo.');
                     blockForm.reset();
                     if (blockTimeWrapper) blockTimeWrapper.classList.remove('hidden');
-                    if (blockDurationWrapper) blockDurationWrapper.classList.remove('hidden');
                     loadAdminData();
                     renderCalendarWidget();
                 } else {
@@ -484,7 +445,6 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         });
     }
-    
 
     // Funzioni globali per eliminare blocchi, prenotazioni e sondaggi
     window.deleteBlock = async function(id) {
@@ -600,14 +560,12 @@ document.addEventListener('DOMContentLoaded', () => {
             tbodyBl.innerHTML = '';
             if (blockedSlotsList.length > 0) {
                 blockedSlotsList.forEach(b => {
-                    const hours = b.hours || 1;
-                    const timeDisplay = b.time ? `${b.time} (${hours} ${hours === 1 ? 'ora' : 'ore'})` : '-';
                     const tr = document.createElement('tr');
                     tr.className = 'border-b border-stone-800 hover:bg-stone-950/40';
                     tr.innerHTML = `
-                        <td class="p-2.5 font-semibold text-amber-400">${b.type === 'day' ? 'Intera Giornata' : 'Fascia Oraria'}</td>
+                        <td class="p-2.5 font-semibold text-amber-400">${b.type === 'day' ? 'Intera Giornata' : 'Orario Specifico'}</td>
                         <td class="p-2.5">${b.date}</td>
-                        <td class="p-2.5">${timeDisplay}</td>
+                        <td class="p-2.5">${b.time || '-'}</td>
                         <td class="p-2.5 italic text-stone-400">${b.reason || 'Chiuso'}</td>
                         <td class="p-2.5 text-right">
                             <button onclick="deleteBlock('${b.id}')" class="px-3 py-1 bg-red-900/40 border border-red-700 text-red-300 rounded text-xs hover:bg-red-900">Rimuovi</button>
