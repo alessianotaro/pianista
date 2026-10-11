@@ -118,43 +118,23 @@ document.addEventListener('DOMContentLoaded', () => {
         const currentMinutes = now.getHours() * 60 + now.getMinutes();
         const r = [];
 
-        function generateDynamicSlots(startHour, startMin, endHour, endMin) {
-            const startTime = startHour * 60 + startMin;
-            const endTime = endHour * 60 + endMin;
-            const slots = [];
+        // Orari fissi consentiti per la prova da 1 ora
+        const allowedSlots = [
+            "09:00", "10:00", "11:00", "12:00", "13:00", 
+            "14:30", "15:30", "16:30"
+        ];
+
+        allowedSlots.forEach(slotStr => {
+            const t = timeToMinutes(slotStr);
+            const past = today && t <= currentMinutes;
             
-            for (let m = startTime; m < endTime; m += 30) {
-                slots.push(hm(m));
+            // Verifica se lo slot è libero (durata fissa a 60 minuti)
+            if (!past && free(t, 60)) {
+                r.push([t, true]);
+            } else {
+                r.push([t, false]);
             }
-            return slots;
-        }
-
-        // Mattina: 09:00 - 13:00
-        const morningSlots = generateDynamicSlots(9, 0, 13, 0);
-        // Pomeriggio: 14:30 - 16:30
-        const afternoonSlots = generateDynamicSlots(14, 30, 16, 30);
-
-        function processSlots(slots, maxEndHour, maxEndMin) {
-            slots.forEach(slotStr => {
-                const t = timeToMinutes(slotStr);
-                const endT = t + durationMinutes;
-                const maxAllowedEnd = maxEndHour * 60 + maxEndMin;
-
-                if (endT > maxAllowedEnd) {
-                    return; 
-                }
-
-                const past = today && t <= currentMinutes;
-                if (!past && free(t, durationMinutes)) {
-                    r.push([t, true]);
-                } else {
-                    r.push([t, false]);
-                }
-            });
-        }
-
-        processSlots(morningSlots, 13, 0);
-        processSlots(afternoonSlots, 16, 30);
+        });
 
         return r;
     }
