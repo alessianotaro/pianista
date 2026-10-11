@@ -167,7 +167,7 @@ document.addEventListener('DOMContentLoaded', () => {
             appContainer.innerHTML = `
                 <div class="text-center py-8 space-y-4">
                     <h3 class="text-2xl font-serif text-amber-400">Prenotazione confermata ✨</h3>
-                    <p class="text-stone-300"><b>${done.name} ${done.surname}</b>, ti aspettiamo per la prova.</p>
+                    <p class="text-stone-300"><b>${done.name} ${done.surname}</b>, ti aspettO per la prova.</p>
                     <p class="text-sm text-stone-400">${it(done.date)}<br>ore ${hm(done.start)} · 1 ora (${done.instrument})</p>
                     <button type="button" onclick="window.resetBooking()" class="px-6 py-2.5 bg-amber-600 text-stone-950 font-semibold rounded-lg hover:bg-amber-500">Nuova prenotazione</button>
                 </div>`;

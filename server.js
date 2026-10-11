@@ -131,7 +131,7 @@ app.get('/api/admin/blocks', (req, res) => {
 
 // POST: Aggiungi un blocco (intera giornata o orario specifico)
 app.post('/api/admin/blocks', (req, res) => {
-    const { type, date, time } = req.body; // type: 'day' oppure 'slot'
+    const { type, date, time, hours, reason } = req.body; // type: 'day' oppure 'slot'
 
     if (!type || !date) {
         return res.status(400).json({ success: false, message: 'Tipo e data sono obbligatori.' });
@@ -142,6 +142,8 @@ app.post('/api/admin/blocks', (req, res) => {
         type,
         date,
         time: time || null,
+        hours: parseInt(hours) || 1, // Gestione ore multiple (default 1)
+        reason: reason ? reason.trim() : (type === 'day' ? 'Chiusura straordinaria' : 'Fascia oraria non disponibile'), // Gestione motivazione personalizzata
         createdAt: new Date().toISOString()
     };
 
