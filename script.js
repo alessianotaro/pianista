@@ -1,5 +1,5 @@
 document.addEventListener('DOMContentLoaded', () => {
-    // Menu mobile toggle e chiusura automatica al click
+    // 1. Menu mobile toggle e chiusura automatica con scroll fluido
     const menuBtn = document.getElementById('menu-btn');
     const mobileMenu = document.getElementById('mobile-menu');
     
@@ -22,9 +22,8 @@ document.addEventListener('DOMContentLoaded', () => {
             });
         });
     }
-    
 
-    // Curriculum "Leggi tutto" dinamico per mobile
+    // 2. Curriculum "Leggi tutto" dinamico per mobile
     const curriculumContainer = document.getElementById('curriculum-container');
     const toggleCurriculumBtn = document.getElementById('toggle-curriculum-btn');
     const curriculumFade = document.getElementById('curriculum-fade');
@@ -36,22 +35,20 @@ document.addEventListener('DOMContentLoaded', () => {
         toggleCurriculumBtn.addEventListener('click', () => {
             isExpanded = !isExpanded;
             if (isExpanded) {
-                // Espande dinamicamente in base all'altezza effettiva del testo
                 curriculumContainer.style.maxHeight = curriculumContainer.scrollHeight + 'px';
-                if (curriculumFade) curriculumFade.classList.add('hidden');
-                toggleText.textContent = 'Riduci';
-                curriculumArrow.style.transform = 'rotate(180deg)';
+                if (curriculumFade) curriculumFade.style.display = 'none';
+                if (toggleText) toggleText.textContent = 'Riduci';
+                if (curriculumArrow) curriculumArrow.style.transform = 'rotate(180deg)';
             } else {
-                // Ritorna all'altezza iniziale chiusa (~13rem)
-                curriculumContainer.style.maxHeight = '13rem';
-                if (curriculumFade) curriculumFade.classList.remove('hidden');
-                toggleText.textContent = 'Leggi tutto';
-                curriculumArrow.style.transform = 'rotate(0deg)';
+                curriculumContainer.style.maxHeight = '200px';
+                if (curriculumFade) curriculumFade.style.display = 'block';
+                if (toggleText) toggleText.textContent = 'Leggi tutto';
+                if (curriculumArrow) curriculumArrow.style.transform = 'rotate(0deg)';
             }
         });
     }
 
-    // Gestione Calendario Prenotazioni Integrato & Blocchi
+    // 3. Gestione Calendario Prenotazioni Integrato & Blocchi
     const appContainer = document.getElementById('booking-app');
     let mon = new Date(), sel = null, start = null, durationMinutes = 60, existingBookings = [], blockedSlotsList = [], err = "", done = null;
     mon.setDate(1);
@@ -61,8 +58,9 @@ document.addEventListener('DOMContentLoaded', () => {
     const ds = d => d.getFullYear() + "-" + pad(d.getMonth() + 1) + "-" + pad(d.getDate());
     const it = d => new Date(d + "T12:00").toLocaleDateString("it-IT", { weekday: "long", day: "numeric", month: "long" });
 
-    // Orari base disponibili giornalieri
-    const baseSlots = ['09:00', '10:00', '11:00', '12:00', '14:00', '15:00', '16:00', '17:00', '18:00'];
+    // Orari base suddivisi per fasce (Mattina fino alle 13:00, Pomeriggio dalle 14:30 alle 16:30)
+    const morningSlots = ['09:00', '10:00', '11:00', '12:00', '13:00'];
+    const afternoonSlots = ['14:30', '15:30', '16:30'];
 
     function timeToMinutes(timeStr) {
         const [h, m] = timeStr.split(':').map(Number);
@@ -85,16 +83,35 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function getAvailableSlots() {
-        const now = new Date(), today = ds(now) === sel, r = [];
-        baseSlots.forEach(slotStr => {
-            const t = timeToMinutes(slotStr);
-            const past = today && t <= now.getHours() * 60 + now.getMinutes();
-            if (!past && free(t, durationMinutes)) {
-                r.push([t, true]);
-            } else {
-                r.push([t, false]);
-            }
-        });
+        const now = new Date(), today = ds(now) === sel;
+        const currentMinutes = now.getHours() * 60 + now.getMinutes();
+        const r = [];
+
+        function processSlots(slots, maxEndHour, maxEndMin) {
+            slots.forEach(slotStr => {
+                const t = timeToMinutes(slotStr);
+                const endT = t + durationMinutes;
+                const maxAllowedEnd = maxEndHour * 60 + maxEndMin;
+
+                if (endT > maxAllowedEnd) {
+                    return; // Salta se la durata sfora la fine della fascia oraria
+                }
+
+                const past = today && t <= currentMinutes;
+                if (!past && free(t, durationMinutes)) {
+                    r.push([t, true]);
+                } else {
+                    r.push([t, false]);
+                }
+            });
+        }
+
+        // Mattina (limite massimo fine fascia: 13:00)
+        processSlots(morningSlots, 13, 0);
+
+        // Pomeriggio (limite massimo fine fascia: 16:30)
+        processSlots(afternoonSlots, 16, 30);
+
         return r;
     }
 
@@ -280,7 +297,7 @@ document.addEventListener('DOMContentLoaded', () => {
         renderCalendarWidget();
     };
 
-    // Sondaggio Anonimo Dettagliato
+    // 4. Sondaggio Anonimo Dettagliato
     const surveyForm = document.getElementById('survey-form');
     if (surveyForm) {
         surveyForm.addEventListener('submit', async (e) => {
@@ -316,7 +333,7 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // Area Riservata Admin
+    // 5. Area Riservata Admin
     const loginForm = document.getElementById('login-form');
     const loginBox = document.getElementById('admin-login-box');
     const dashboard = document.getElementById('admin-dashboard');
