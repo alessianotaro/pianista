@@ -391,6 +391,54 @@ document.addEventListener('DOMContentLoaded', () => {
     const dashboard = document.getElementById('admin-dashboard');
     const logoutBtn = document.getElementById('logout-btn');
 
+    let adminMon = new Date(), adminSelDate = null;
+    adminMon.setDate(1);
+
+    function renderAdminCalendar() {
+        const container = document.getElementById('admin-mini-calendar');
+        if (!container) return;
+
+        const y = adminMon.getFullYear(), mo = adminMon.getMonth();
+        const first = (new Date(y, mo, 1).getDay() + 6) % 7;
+        const dim = new Date(y, mo + 1, 0).getDate();
+
+        let cal = `<div class="flex justify-between items-center mb-3">
+            <button type="button" onclick="window.moveAdminMonth(-1)" class="px-2.5 py-1 bg-stone-900 border border-stone-800 rounded hover:border-amber-400 text-xs text-stone-200">‹</button>
+            <b class="font-serif capitalize text-amber-400 text-xs">${adminMon.toLocaleDateString("it-IT", { month: "long", year: "numeric" })}</b>
+            <button type="button" onclick="window.moveAdminMonth(1)" class="px-2.5 py-1 bg-stone-900 border border-stone-800 rounded hover:border-amber-400 text-xs text-stone-200">›</button>
+        </div>`;
+
+        cal += `<div class="grid grid-cols-7 gap-1 text-center text-[10px] text-stone-400 mb-1">`;
+        ["L", "M", "M", "G", "V", "S", "D"].forEach(x => cal += `<span>${x}</span>`);
+        cal += `</div><div class="grid grid-cols-7 gap-1 text-center text-xs">`;
+
+        for (let i = 0; i < first; i++) cal += `<span></span>`;
+        for (let d = 1; d <= dim; d++) {
+            const k = y + "-" + pad(mo + 1) + "-" + pad(d);
+            const isSelected = k === adminSelDate;
+            cal += `<button type="button" class="py-1.5 rounded text-xs transition ${isSelected ? 'bg-amber-600 text-stone-950 font-bold' : 'bg-stone-900 hover:border-amber-400 border border-stone-800 text-stone-300'}" onclick="window.pickAdminDate('${k}')">${d}</button>`;
+        }
+        cal += `</div>`;
+
+        container.innerHTML = cal;
+    }
+
+    window.moveAdminMonth = function(n) {
+        adminMon.setMonth(adminMon.getMonth() + n);
+        renderAdminCalendar();
+    };
+
+    window.pickAdminDate = function(k) {
+        adminSelDate = k;
+        document.getElementById('block-date').value = k;
+        const display = document.getElementById('admin-calendar-container');
+        if (display) {
+            display.textContent = new Date(k + "T12:00").toLocaleDateString("it-IT", { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
+            display.className = "inline-block px-3 py-1.5 bg-stone-950 border gold-border rounded-lg text-amber-400 text-xs font-semibold";
+        }
+        renderAdminCalendar();
+    };
+
     if (loginForm) {
         loginForm.addEventListener('submit', async (e) => {
             e.preventDefault();
@@ -407,6 +455,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     loginBox.classList.add('hidden');
                     dashboard.classList.remove('hidden');
                     loadAdminData();
+                    renderAdminCalendar(); // Inizializza il mini calendario all'accesso
                 } else {
                     alert('Password errata!');
                 }
@@ -441,51 +490,51 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // Invio form blocco admin (supporta tipo slot e ore)
-    const blockForm = document.getElementById('block-form');
-    if (blockForm) {
-        blockForm.addEventListener('submit', async (e) => {
-            e.preventDefault();
-            const type = document.getElementById('block-type').value;
-            
-            // Recuperiamo i valori dai campi HTML
-            const dateVal = document.getElementById('block-date').value;
-            const timeVal = type === 'slot' ? document.getElementById('block-time').value : null;
-            const hoursVal = type === 'slot' ? parseInt(document.getElementById('block-hours').value) || 1 : null;
-            const reasonVal = document.getElementById('block-reason')?.value.trim() || 'Chiuso';
+    // Funzione globale per inviare il blocco
+    window.submitAdminBlock = async function() {
+        const type = document.getElementById('block-type').value;
+        const dateVal = document.getElementById('block-date').value;
+        const timeVal = type === 'slot' ? document.getElementById('block-time').value : null;
+        const hoursVal = type === 'slot' ? parseInt(document.getElementById('block-hours').value) || 1 : null;
+        const reasonVal = document.getElementById('block-reason')?.value.trim() || 'Chiuso';
 
-            const payload = {
-                type: type,
-                date: dateVal,
-                time: timeVal,
-                hours: hoursVal,
-                reason: reasonVal
-            };
+        if (!dateVal) {
+            alert('Seleziona una data dal mini calendario.');
+            return;
+        }
 
-            console.log("Invio payload blocco:", payload); // <-- Aggiungi questo per controllare in console (F12)
+        const payload = {
+            type: type,
+            date: dateVal,
+            time: timeVal,
+            hours: hoursVal,
+            reason: reasonVal
+        };
 
-            try {
-                const res = await fetch('/api/admin/blocks', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(payload)
-                });
-                const json = await res.json();
-                if (json.success) {
-                    alert('Periodo bloccato con successo.');
-                    blockForm.reset();
-                    if (blockTimeWrapper) blockTimeWrapper.classList.remove('hidden');
-                    if (blockDurationWrapper) blockDurationWrapper.classList.remove('hidden');
-                    loadAdminData();
-                    renderCalendarWidget();
-                } else {
-                    alert('Errore: ' + json.message);
-                }
-            } catch (err) {
-                alert('Errore di connessione.');
+        try {
+            const res = await fetch('/api/admin/blocks', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
+            });
+            const json = await res.json();
+            if (json.success) {
+                alert('Periodo bloccato con successo.');
+                document.getElementById('block-reason').value = '';
+                adminSelDate = null;
+                document.getElementById('block-date').value = '';
+                const display = document.getElementById('admin-calendar-container');
+                if (display) display.textContent = 'Clicca un giorno sotto';
+                loadAdminData();
+                renderCalendarWidget();
+                renderAdminCalendar();
+            } else {
+                alert('Errore: ' + json.message);
             }
-        });
-    }
+        } catch (err) {
+            alert('Errore di connessione.');
+        }
+    };
 
     window.deleteBlock = async function(id) {
         if (!confirm('Vuoi rimuovere questo blocco e rendere nuovamente disponibile l\'orario?')) return;
@@ -537,11 +586,11 @@ document.addEventListener('DOMContentLoaded', () => {
     async function loadAdminData() {
         await loadBookingData();
 
+        // 1. Tabella Prove Prenotate ordinate cronologicamente in formato italiano
         const tbodyB = document.getElementById('admin-bookings-table');
         if (tbodyB) {
             tbodyB.innerHTML = '';
             if (existingBookings.length > 0) {
-                // Ordina per data crescente e, a parità di data, per ora crescente
                 existingBookings.sort((a, b) => {
                     if (a.date !== b.date) {
                         return a.date.localeCompare(b.date);
@@ -550,7 +599,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 });
 
                 existingBookings.forEach(b => {
-                    // Formatta la data in stile italiano (es. Lunedì 12 ottobre 2026)
                     const dataItaliana = new Date(b.date + "T12:00").toLocaleDateString("it-IT", { 
                         weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' 
                     });
@@ -575,6 +623,7 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         }
 
+        // Sondaggi
         try {
             const resS = await fetch('/api/surveys');
             const jsonS = await resS.json();
@@ -605,6 +654,7 @@ document.addEventListener('DOMContentLoaded', () => {
             console.error(e);
         }
 
+        // Tabella Blocchi Attivi
         const tbodyBl = document.getElementById('admin-blocks-table');
         if (tbodyBl) {
             tbodyBl.innerHTML = '';
