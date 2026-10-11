@@ -416,7 +416,7 @@
                         <h4 class="text-xl font-serif text-amber-400">Gestione Chiusure e Giorni/Orari Occupati</h4>
                         <p class="text-sm text-stone-400">Blocca un'intera giornata o un singolo orario in cui non desideri ricevere prenotazioni.</p>
                         
-                        <form id="block-form" class="grid grid-cols-1 sm:grid-cols-4 gap-4 items-end pt-2">
+                        <form id="block-form" class="grid grid-cols-1 sm:grid-cols-5 gap-4 items-end pt-2">
                             <div>
                                 <label class="block text-xs text-stone-300 mb-1">Tipo di Blocco</label>
                                 <select id="block-type" class="w-full bg-stone-950 border gold-border rounded-lg px-3 py-2 text-stone-200 text-sm">
@@ -435,12 +435,14 @@
                                     <option value="10:00">10:00</option>
                                     <option value="11:00">11:00</option>
                                     <option value="12:00">12:00</option>
-                                    <option value="14:00">14:00</option>
-                                    <option value="15:00">15:00</option>
-                                    <option value="16:00">16:00</option>
-                                    <option value="17:00">17:00</option>
-                                    <option value="18:00">18:00</option>
+                                    <option value="14:30">14:30</option>
+                                    <option value="15:30">15:30</option>
+                                    <option value="16:30">16:30</option>
                                 </select>
+                            </div>
+                            <div>
+                                <label class="block text-xs text-stone-300 mb-1">Motivazione</label>
+                                <input type="text" id="block-reason" placeholder="Es. Concerto / Impegno" class="w-full bg-stone-950 border gold-border rounded-lg px-3 py-2 text-stone-200 text-sm">
                             </div>
                             <div>
                                 <button type="submit" class="w-full py-2.5 bg-amber-600 text-stone-950 font-semibold rounded-lg hover:bg-amber-500 text-sm">Aggiungi Blocco</button>
