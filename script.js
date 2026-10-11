@@ -91,15 +91,14 @@ document.addEventListener('DOMContentLoaded', () => {
         const isDayBlocked = blockedSlotsList.some(b => b.date === sel && b.type === 'day');
         if (isDayBlocked) return false;
 
-        // Controllo blocchi a fascia oraria
+        // Controllo blocchi a fascia oraria con ore multiple
         const dateBlocks = blockedSlotsList.filter(b => b.date === sel && b.type === 'slot');
         for (let block of dateBlocks) {
             const blockStartMinutes = timeToMinutes(block.time);
-            // Assicuriamoci che block.hours sia convertito in numero (default 1)
             const blockHours = parseInt(block.hours) || 1;
             const blockEndMinutes = blockStartMinutes + (blockHours * 60);
 
-            // Se l'orario della prova si sovrappone al blocco, restituisce false
+            // Se l'orario della prova si sovrappone alla fascia bloccata, restituisce false
             if (t < blockEndMinutes && t + dur > blockStartMinutes) {
                 return false;
             }
@@ -118,6 +117,7 @@ document.addEventListener('DOMContentLoaded', () => {
             return bTimeMinutes < t + dur && bTimeMinutes + b.duration > t;
         });
     }
+
 
     function getAvailableSlots() {
         if (isWeekend(sel)) return [];
@@ -212,10 +212,11 @@ document.addEventListener('DOMContentLoaded', () => {
                         <p class="text-stone-500 text-xs italic">Il sabato e la domenica lo studio è chiuso.</p>
                     </div>`;
             } else if (dayBlock) {
+                const motivoGiorno = dayBlock.reason && dayBlock.reason.trim() !== '' ? dayBlock.reason : 'Chiusura straordinaria';
                 h += `
                     <div class="bg-red-950/40 border border-red-800/60 p-4 rounded-xl text-center space-y-1">
                         <p class="text-red-300 font-semibold text-sm">Giornata non disponibile per le prenotazioni</p>
-                        <p class="text-stone-400 text-xs italic">Motivo: ${dayBlock.reason || 'Chiusura straordinaria'}</p>
+                        <p class="text-stone-400 text-xs italic">Motivo: ${motivoGiorno}</p>
                     </div>`;
             } else {
                 if (slotBlocks.length > 0) {
@@ -224,8 +225,9 @@ document.addEventListener('DOMContentLoaded', () => {
                         <ul class="list-disc list-inside text-stone-400 space-y-0.5">`;
                     slotBlocks.forEach(sb => {
                         const hCount = sb.hours || 1;
-                        const motivazione = sb.reason && sb.reason.trim() !== '' ? sb.reason : 'Riservato';
-                        h += `<li>Dalle ore <b>${sb.time}</b> (${hCount} ${hCount === 1 ? 'ora' : 'ore'}) non disponibile: <i>${motivazione}</i></li>`;
+                        // Prende la motivazione inserita dall'admin, altrimenti mostra un fallback pulito
+                        const motivoText = sb.reason && sb.reason.trim() !== '' ? sb.reason : 'Fascia oraria non disponibile';
+                        h += `<li>Dalle ore <b>${sb.time}</b> (${hCount} ${hCount === 1 ? 'ora' : 'ore'}) non disponibile: <i>${motivoText}</i></li>`;
                     });
                     h += `</ul></div>`;
                 }
@@ -496,7 +498,8 @@ document.addEventListener('DOMContentLoaded', () => {
         const dateVal = document.getElementById('block-date').value;
         const timeVal = type === 'slot' ? document.getElementById('block-time').value : null;
         const hoursVal = type === 'slot' ? parseInt(document.getElementById('block-hours').value) || 1 : null;
-        const reasonVal = document.getElementById('block-reason')?.value.trim() || 'Chiuso';
+        // Se il campo motivazione è vuoto, mette un valore di default, altrimenti usa ciò che ha scritto l'admin
+        const reasonVal = document.getElementById('block-reason')?.value.trim() || (type === 'day' ? 'Chiusura straordinaria' : 'Fascia oraria non disponibile');
 
         if (!dateVal) {
             alert('Seleziona una data dal mini calendario.');
@@ -535,6 +538,7 @@ document.addEventListener('DOMContentLoaded', () => {
             alert('Errore di connessione.');
         }
     };
+    
 
     window.deleteBlock = async function(id) {
         if (!confirm('Vuoi rimuovere questo blocco e rendere nuovamente disponibile l\'orario?')) return;
