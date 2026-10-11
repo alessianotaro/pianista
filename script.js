@@ -58,13 +58,9 @@ document.addEventListener('DOMContentLoaded', () => {
     const ds = d => d.getFullYear() + "-" + pad(d.getMonth() + 1) + "-" + pad(d.getDate());
     const it = d => new Date(d + "T12:00").toLocaleDateString("it-IT", { weekday: "long", day: "numeric", month: "long" });
 
-    function formatDurationLabel(mins) {
-        const h = Math.floor(mins / 60);
-        const m = mins % 60;
-        if (h === 0) return `${m} min`;
-        if (m === 0) return `${h} ${h === 1 ? 'ora' : 'ore'}`;
-        return `${h}h ${m}m (${mins} min)`;
-    }
+    // Orari base suddivisi per fasce (Mattina fino alle 13:00, Pomeriggio dalle 14:30 alle 16:30)
+    const morningSlots = ['09:00', '10:00', '11:00', '12:00', '13:00'];
+    const afternoonSlots = ['14:30', '15:30', '16:30'];
 
     function timeToMinutes(timeStr) {
         const [h, m] = timeStr.split(':').map(Number);
@@ -79,13 +75,6 @@ document.addEventListener('DOMContentLoaded', () => {
         const slotTimeStr = hm(t);
         if (dateBlocks.some(b => b.time === slotTimeStr)) return false;
 
-        // Pausa Pranzo (14:00 - 14:30)
-        const breakStart = 14 * 60; 
-        const breakEnd = 14 * 60 + 30; 
-        if (t < breakEnd && t + dur > breakStart) {
-            return false;
-        }
-
         return !existingBookings.some(b => {
             if (b.date !== sel) return false;
             const bTimeMinutes = timeToMinutes(b.time);
@@ -98,31 +87,30 @@ document.addEventListener('DOMContentLoaded', () => {
         const currentMinutes = now.getHours() * 60 + now.getMinutes();
         const r = [];
 
-        const morningStart = 9 * 60;
-        const morningLimit = 14 * 60; // Fine mattina ore 14:00
+        function processSlots(slots, maxEndHour, maxEndMin) {
+            slots.forEach(slotStr => {
+                const t = timeToMinutes(slotStr);
+                const endT = t + durationMinutes;
+                const maxAllowedEnd = maxEndHour * 60 + maxEndMin;
 
-        const afternoonStart = 14 * 60 + 30;
-        const afternoonLimit = 16 * 60 + 30; // Fine pomeriggio ore 16:30
+                if (endT > maxAllowedEnd) {
+                    return; // Salta se la durata sfora la fine della fascia oraria
+                }
 
-        // Slot mattina (ogni 30 minuti)
-        for (let t = morningStart; t + durationMinutes <= morningLimit; t += 30) {
-            const past = today && t <= currentMinutes;
-            if (!past && free(t, durationMinutes)) {
-                r.push([t, true]);
-            } else {
-                r.push([t, false]);
-            }
+                const past = today && t <= currentMinutes;
+                if (!past && free(t, durationMinutes)) {
+                    r.push([t, true]);
+                } else {
+                    r.push([t, false]);
+                }
+            });
         }
 
-        // Slot pomeriggio (ogni 30 minuti)
-        for (let t = afternoonStart; t + durationMinutes <= afternoonLimit; t += 30) {
-            const past = today && t <= currentMinutes;
-            if (!past && free(t, durationMinutes)) {
-                r.push([t, true]);
-            } else {
-                r.push([t, false]);
-            }
-        }
+        // Mattina (limite massimo fine fascia: 13:00)
+        processSlots(morningSlots, 13, 0);
+
+        // Pomeriggio (limite massimo fine fascia: 16:30)
+        processSlots(afternoonSlots, 16, 30);
 
         return r;
     }
@@ -150,7 +138,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 <div class="text-center py-8 space-y-4">
                     <h3 class="text-2xl font-serif text-amber-400">Prenotazione confermata ✨</h3>
                     <p class="text-stone-300"><b>${done.name} ${done.surname}</b>, ti aspettiamo per la prova.</p>
-                    <p class="text-sm text-stone-400">${it(done.date)}<br>ore ${hm(done.start)} · ${formatDurationLabel(done.duration)} (${done.instrument})</p>
+                    <p class="text-sm text-stone-400">${it(done.date)}<br>ore ${hm(done.start)} · ${done.duration} min (${done.instrument})</p>
                     <button type="button" onclick="window.resetBooking()" class="px-6 py-2.5 bg-amber-600 text-stone-950 font-semibold rounded-lg hover:bg-amber-500">Nuova prenotazione</button>
                 </div>`;
             return;
@@ -182,31 +170,19 @@ document.addEventListener('DOMContentLoaded', () => {
             h += `<div class="mt-6 pt-6 border-t border-stone-800 space-y-4">
                 <p class="text-sm font-semibold text-amber-400">Data selezionata: ${it(sel)}</p>
                 
-                <!-- Selettore Durata con Pulsanti e Frecce -->
-                <div class="bg-stone-950/40 p-4 rounded-xl border border-stone-800 space-y-2">
-                    <div class="flex justify-between items-center">
-                        <label class="block text-xs text-stone-400">Durata della Prova</label>
-                        <span id="duration-label" class="text-xs font-semibold text-amber-400">${formatDurationLabel(durationMinutes)}</span>
-                    </div>
-                    
-                    <div class="flex items-center justify-between gap-2">
-                        <button type="button" onclick="window.adjustDuration(-5)" class="px-3 py-1.5 bg-stone-900 border border-stone-800 hover:border-amber-400 text-stone-200 rounded-lg text-sm font-bold transition">-5m</button>
-                        <button type="button" onclick="window.adjustDuration(-1)" class="px-2 py-1.5 bg-stone-900 border border-stone-800 hover:border-amber-400 text-stone-200 rounded-lg text-xs transition">◀ -1m</button>
-                        
-                        <div class="text-center font-mono text-amber-400 font-bold text-sm sm:text-base" id="duration-display">${durationMinutes} min</div>
-                        
-                        <button type="button" onclick="window.adjustDuration(1)" class="px-2 py-1.5 bg-stone-900 border border-stone-800 hover:border-amber-400 text-stone-200 rounded-lg text-xs transition">+1m ▶</button>
-                        <button type="button" onclick="window.adjustDuration(5)" class="px-3 py-1.5 bg-stone-900 border border-stone-800 hover:border-amber-400 text-stone-200 rounded-lg text-sm font-bold transition">+5m</button>
-                    </div>
-                    <div class="flex justify-between text-[10px] text-stone-500 pt-1">
-                        <span>Min: 60 min (1h)</span>
-                        <span>Max: 120 min (2h)</span>
-                    </div>
+                <div>
+                    <label class="block text-xs text-stone-400 mb-1">Durata della Prova</label>
+                    <select id="widget-duration" onchange="window.setDuration(this.value)" class="w-full bg-stone-950 border border-stone-800 rounded-lg px-3 py-2 text-stone-200 text-sm">
+                        <option value="30" ${durationMinutes === 30 ? 'selected' : ''}>30 minuti</option>
+                        <option value="60" ${durationMinutes === 60 ? 'selected' : ''}>60 minuti (1 ora)</option>
+                        <option value="90" ${durationMinutes === 90 ? 'selected' : ''}>90 minuti</option>
+                        <option value="120" ${durationMinutes === 120 ? 'selected' : ''}>120 minuti (2 ore)</option>
+                    </select>
                 </div>
 
                 <div>
                     <label class="block text-xs text-stone-400 mb-2">Orari Disponibili</label>
-                    <div class="grid grid-cols-2 sm:grid-cols-4 gap-2">`;
+                    <div class="grid grid-cols-3 sm:grid-cols-4 gap-2">`;
             
             let anyAvailable = false;
             getAvailableSlots().forEach(([t, ok]) => {
@@ -254,12 +230,8 @@ document.addEventListener('DOMContentLoaded', () => {
         await renderCalendarWidget();
     };
 
-    window.adjustDuration = function(delta) {
-        let newDur = durationMinutes + delta;
-        if (newDur < 60) newDur = 60;   // Minimo 1 ora
-        if (newDur > 120) newDur = 120; // Massimo 2 ore
-        
-        durationMinutes = newDur;
+    window.setDuration = function(val) {
+        durationMinutes = parseInt(val);
         start = null;
         renderCalendarWidget();
     };
@@ -421,8 +393,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const payload = {
                 type: document.getElementById('block-type').value,
                 date: document.getElementById('block-date').value,
-                time: document.getElementById('block-type').value === 'slot' ? document.getElementById('block-time').value : null,
-                reason: document.getElementById('block-reason')?.value.trim() || 'Chiuso'
+                time: document.getElementById('block-type').value === 'slot' ? document.getElementById('block-time').value : null
             };
 
             try {
@@ -498,6 +469,7 @@ document.addEventListener('DOMContentLoaded', () => {
     async function loadAdminData() {
         await loadBookingData();
 
+        // Carica prenotazioni (con pulsante elimina)
         const tbodyB = document.getElementById('admin-bookings-table');
         if (tbodyB) {
             tbodyB.innerHTML = '';
@@ -523,6 +495,7 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         }
 
+        // Carica sondaggi dettagliati (con pulsante elimina)
         try {
             const resS = await fetch('/api/surveys');
             const jsonS = await resS.json();
@@ -553,6 +526,7 @@ document.addEventListener('DOMContentLoaded', () => {
             console.error(e);
         }
 
+        // Carica blocchi attivi nella tabella admin
         const tbodyBl = document.getElementById('admin-blocks-table');
         if (tbodyBl) {
             tbodyBl.innerHTML = '';
@@ -564,7 +538,6 @@ document.addEventListener('DOMContentLoaded', () => {
                         <td class="p-2.5 font-semibold text-amber-400">${b.type === 'day' ? 'Intera Giornata' : 'Orario Specifico'}</td>
                         <td class="p-2.5">${b.date}</td>
                         <td class="p-2.5">${b.time || '-'}</td>
-                        <td class="p-2.5 italic text-stone-400">${b.reason || 'Chiuso'}</td>
                         <td class="p-2.5 text-right">
                             <button onclick="deleteBlock('${b.id}')" class="px-3 py-1 bg-red-900/40 border border-red-700 text-red-300 rounded text-xs hover:bg-red-900">Rimuovi</button>
                         </td>
@@ -572,10 +545,11 @@ document.addEventListener('DOMContentLoaded', () => {
                     tbodyBl.appendChild(tr);
                 });
             } else {
-                tbodyBl.innerHTML = `<tr><td colspan="5" class="p-3 text-center text-stone-500">Nessun blocco attivo.</td></tr>`;
+                tbodyBl.innerHTML = `<tr><td colspan="4" class="p-3 text-center text-stone-500">Nessun blocco attivo.</td></tr>`;
             }
         }
     }
 
+    // Inizializzazione Calendario Widget all'avvio
     loadBookingData().then(() => renderCalendarWidget());
 });
