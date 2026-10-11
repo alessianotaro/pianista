@@ -74,15 +74,6 @@ document.addEventListener('DOMContentLoaded', () => {
     const ds = d => d.getFullYear() + "-" + pad(d.getMonth() + 1) + "-" + pad(d.getDate());
     const it = d => new Date(d + "T12:00").toLocaleDateString("it-IT", { weekday: "long", day: "numeric", month: "long" });
 
-    // Funzione per formattare la durata in formato leggibile (es. 68 min -> "1h 8m")
-    function formatDurationLabel(mins) {
-        const h = Math.floor(mins / 60);
-        const m = mins % 60;
-        if (h === 0) return `${m} min`;
-        if (m === 0) return `${h} ${h === 1 ? 'ora' : 'ore'}`;
-        return `${h}h ${m}m (${mins} min)`;
-    }
-
     function timeToMinutes(timeStr) {
         const [h, m] = timeStr.split(':').map(Number);
         return h * 60 + m;
@@ -191,7 +182,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 <div class="text-center py-8 space-y-4">
                     <h3 class="text-2xl font-serif text-amber-400">Prenotazione confermata ✨</h3>
                     <p class="text-stone-300"><b>${done.name} ${done.surname}</b>, ti aspettiamo per la prova.</p>
-                    <p class="text-sm text-stone-400">${it(done.date)}<br>ore ${hm(done.start)} · ${formatDurationLabel(done.duration)} (${done.instrument})</p>
+                    <p class="text-sm text-stone-400">${it(done.date)}<br>ore ${hm(done.start)} · 1 ora (${done.instrument})</p>
                     <button type="button" onclick="window.resetBooking()" class="px-6 py-2.5 bg-amber-600 text-stone-950 font-semibold rounded-lg hover:bg-amber-500">Nuova prenotazione</button>
                 </div>`;
             return;
@@ -252,18 +243,10 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
 
                 h += `
-                <!-- Cursore continuo con step di 1 minuto (da 60 a 120 minuti) -->
-                <div class="bg-stone-950/40 p-3 rounded-xl border border-stone-800">
-                    <div class="flex justify-between items-center mb-1">
-                        <label class="block text-xs text-stone-400">Durata della Prova</label>
-                        <span id="duration-label" class="text-xs font-semibold text-amber-400">${formatDurationLabel(durationMinutes)}</span>
-                    </div>
-                    <input type="range" id="widget-duration-range" min="60" max="120" step="1" value="${durationMinutes}" oninput="window.setDurationRange(this.value)" class="w-full accent-amber-500 cursor-pointer">
-                    <div class="flex justify-between text-[10px] text-stone-500 mt-1">
-                        <span>1 ora (60 min)</span>
-                        <span>1h 30m</span>
-                        <span>2 ore (120 min)</span>
-                    </div>
+                <!-- Durata fissa e nota informativa -->
+                <div class="bg-stone-950/40 p-3 rounded-xl border border-stone-800 flex justify-between items-center text-xs">
+                    <span class="text-stone-300">Durata della prova: <b>1 ora</b></span>
+                    <span class="text-stone-500 italic">Per durate superiori, contattare il docente</span>
                 </div>
 
                 <div>
@@ -277,7 +260,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     h += `<button type="button" class="py-2 rounded-lg text-xs font-medium border transition ${isSelectedTime ? 'bg-amber-600 text-stone-950 font-bold' : ok ? 'bg-stone-950 border-stone-800 hover:border-amber-400 text-stone-300' : 'bg-stone-950 border-stone-900 text-stone-700 line-through cursor-not-allowed'}" ${ok ? '' : 'disabled'} onclick="window.pickTime(${t})">${hm(t)}</button>`;
                 });
                 h += `</div>`;
-                if (!anyAvailable) h += `<p class="text-xs text-stone-500 mt-2">Nessun orario disponibile per questa durata in questo giorno.</p>`;
+                if (!anyAvailable) h += `<p class="text-xs text-stone-500 mt-2">Nessun orario disponibile per questo giorno.</p>`;
                 h += `</div>`;
 
                 if (start !== null) {
@@ -293,7 +276,7 @@ document.addEventListener('DOMContentLoaded', () => {
                                 <input id="w-piece" placeholder="Brano in prova *" class="w-full bg-stone-950 border border-stone-800 rounded-lg px-3 py-2 text-sm text-stone-200">
                             </div>
                             <p class="text-red-400 text-xs">${err}</p>
-                            <button type="button" id="w-go" onclick="window.submitWidgetBooking()" class="w-full py-3 bg-amber-600 text-stone-950 font-semibold rounded-lg hover:bg-amber-500 text-sm">Conferma Prenotazione (${hm(start)} - ${hm(start + durationMinutes)})</button>
+                            <button type="button" id="w-go" onclick="window.submitWidgetBooking()" class="w-full py-3 bg-amber-600 text-stone-950 font-semibold rounded-lg hover:bg-amber-500 text-sm">Conferma Prenotazione (${hm(start)} - ${hm(start + 60)})</button>
                         </div>`;
                 }
             }
@@ -301,7 +284,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         appContainer.innerHTML = h;
-    }    
+    }
     
 
     // Funzioni globali per il widget interattivo
