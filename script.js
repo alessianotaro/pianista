@@ -86,22 +86,25 @@ document.addEventListener('DOMContentLoaded', () => {
     function free(t, dur) {
         if (isWeekend(sel)) return false;
 
+        // Controllo se l'intera giornata è bloccata
         const isDayBlocked = blockedSlotsList.some(b => b.date === sel && b.type === 'day');
         if (isDayBlocked) return false;
 
-        // Gestione blocchi a fascia oraria con durata in ore
+        // Controllo blocchi a fascia oraria
         const dateBlocks = blockedSlotsList.filter(b => b.date === sel && b.type === 'slot');
         for (let block of dateBlocks) {
             const blockStartMinutes = timeToMinutes(block.time);
-            const blockDurationMinutes = (block.hours || 1) * 60;
-            const blockEndMinutes = blockStartMinutes + blockDurationMinutes;
+            // Assicuriamoci che block.hours sia convertito in numero (default 1)
+            const blockHours = parseInt(block.hours) || 1;
+            const blockEndMinutes = blockStartMinutes + (blockHours * 60);
 
+            // Se l'orario della prova si sovrappone al blocco, restituisce false
             if (t < blockEndMinutes && t + dur > blockStartMinutes) {
                 return false;
             }
         }
 
-        // Controllo sovrapposizione con Pausa Pranzo (14:00 - 14:30)
+        // Controllo pausa pranzo (14:00 - 14:30)
         const breakStart = 14 * 60;
         const breakEnd = 14 * 60 + 30;
         if (t < breakEnd && t + dur > breakStart) {
@@ -219,8 +222,9 @@ document.addEventListener('DOMContentLoaded', () => {
                         <p class="text-amber-300 font-medium">Nota per questa giornata:</p>
                         <ul class="list-disc list-inside text-stone-400 space-y-0.5">`;
                     slotBlocks.forEach(sb => {
-                        const blockHours = sb.hours || 1;
-                        h += `<li>Dalle ore <b>${sb.time}</b> (${blockHours} ${blockHours === 1 ? 'ora' : 'ore'}) non disponibile: <i>${sb.reason || 'Riservato'}</i></li>`;
+                        const hCount = sb.hours || 1;
+                        const motivazione = sb.reason && sb.reason.trim() !== '' ? sb.reason : 'Riservato';
+                        h += `<li>Dalle ore <b>${sb.time}</b> (${hCount} ${hCount === 1 ? 'ora' : 'ore'}) non disponibile: <i>${motivazione}</i></li>`;
                     });
                     h += `</ul></div>`;
                 }
