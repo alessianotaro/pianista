@@ -170,18 +170,14 @@ document.addEventListener('DOMContentLoaded', () => {
             h += `<div class="mt-6 pt-6 border-t border-stone-800 space-y-4">
                 <p class="text-sm font-semibold text-amber-400">Data selezionata: ${it(sel)}</p>
                 
-                <!-- Durata scorrevole da 60 a 120 minuti -->
-                <div class="bg-stone-950/40 p-3 rounded-xl border border-stone-800">
-                    <div class="flex justify-between items-center mb-1">
-                        <label class="block text-xs text-stone-400">Durata della Prova</label>
-                        <span id="duration-label" class="text-xs font-semibold text-amber-400">${durationMinutes} minuti (${(durationMinutes/60).toFixed(1).replace('.0','')}h)</span>
-                    </div>
-                    <input type="range" id="widget-duration-range" min="60" max="120" step="15" value="${durationMinutes}" oninput="window.setDurationRange(this.value)" class="w-full accent-amber-500 cursor-pointer">
-                    <div class="flex justify-between text-[10px] text-stone-500 mt-1">
-                        <span>1 ora (60m)</span>
-                        <span>1h 30m</span>
-                        <span>2 ore (120m)</span>
-                    </div>
+                <div>
+                    <label class="block text-xs text-stone-400 mb-1">Durata della Prova</label>
+                    <select id="widget-duration" onchange="window.setDuration(this.value)" class="w-full bg-stone-950 border border-stone-800 rounded-lg px-3 py-2 text-stone-200 text-sm">
+                        <option value="30" ${durationMinutes === 30 ? 'selected' : ''}>30 minuti</option>
+                        <option value="60" ${durationMinutes === 60 ? 'selected' : ''}>60 minuti (1 ora)</option>
+                        <option value="90" ${durationMinutes === 90 ? 'selected' : ''}>90 minuti</option>
+                        <option value="120" ${durationMinutes === 120 ? 'selected' : ''}>120 minuti (2 ore)</option>
+                    </select>
                 </div>
 
                 <div>
@@ -234,11 +230,9 @@ document.addEventListener('DOMContentLoaded', () => {
         await renderCalendarWidget();
     };
 
-    window.setDurationRange = function(val) {
+    window.setDuration = function(val) {
         durationMinutes = parseInt(val);
         start = null;
-        const label = document.getElementById('duration-label');
-        if (label) label.textContent = `${durationMinutes} minuti (${(durationMinutes/60).toFixed(1).replace('.0','')}h)`;
         renderCalendarWidget();
     };
 
@@ -399,8 +393,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const payload = {
                 type: document.getElementById('block-type').value,
                 date: document.getElementById('block-date').value,
-                time: document.getElementById('block-type').value === 'slot' ? document.getElementById('block-time').value : null,
-                reason: document.getElementById('block-reason')?.value.trim() || 'Chiuso'
+                time: document.getElementById('block-type').value === 'slot' ? document.getElementById('block-time').value : null
             };
 
             try {
@@ -545,7 +538,6 @@ document.addEventListener('DOMContentLoaded', () => {
                         <td class="p-2.5 font-semibold text-amber-400">${b.type === 'day' ? 'Intera Giornata' : 'Orario Specifico'}</td>
                         <td class="p-2.5">${b.date}</td>
                         <td class="p-2.5">${b.time || '-'}</td>
-                        <td class="p-2.5 italic text-stone-400">${b.reason || 'Chiuso'}</td>
                         <td class="p-2.5 text-right">
                             <button onclick="deleteBlock('${b.id}')" class="px-3 py-1 bg-red-900/40 border border-red-700 text-red-300 rounded text-xs hover:bg-red-900">Rimuovi</button>
                         </td>
@@ -553,7 +545,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     tbodyBl.appendChild(tr);
                 });
             } else {
-                tbodyBl.innerHTML = `<tr><td colspan="5" class="p-3 text-center text-stone-500">Nessun blocco attivo.</td></tr>`;
+                tbodyBl.innerHTML = `<tr><td colspan="4" class="p-3 text-center text-stone-500">Nessun blocco attivo.</td></tr>`;
             }
         }
     }
