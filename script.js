@@ -446,13 +446,22 @@ document.addEventListener('DOMContentLoaded', () => {
         blockForm.addEventListener('submit', async (e) => {
             e.preventDefault();
             const type = document.getElementById('block-type').value;
+            
+            // Recuperiamo i valori dai campi HTML
+            const dateVal = document.getElementById('block-date').value;
+            const timeVal = type === 'slot' ? document.getElementById('block-time').value : null;
+            const hoursVal = type === 'slot' ? parseInt(document.getElementById('block-hours').value) || 1 : null;
+            const reasonVal = document.getElementById('block-reason')?.value.trim() || 'Chiuso';
+
             const payload = {
                 type: type,
-                date: document.getElementById('block-date').value,
-                time: type === 'slot' ? document.getElementById('block-time').value : null,
-                hours: type === 'slot' ? parseInt(document.getElementById('block-hours').value || 1) : null,
-                reason: document.getElementById('block-reason')?.value.trim() || 'Chiuso'
+                date: dateVal,
+                time: timeVal,
+                hours: hoursVal,
+                reason: reasonVal
             };
+
+            console.log("Invio payload blocco:", payload); // <-- Aggiungi questo per controllare in console (F12)
 
             try {
                 const res = await fetch('/api/admin/blocks', {
