@@ -341,9 +341,10 @@ document.addEventListener('DOMContentLoaded', () => {
                 done = { name, surname, date: sel, start, duration: 60, instrument };
                 err = "";
                 
-                // Fa risalire la pagina in modo fluido all'inizio del widget di prenotazione
-                if (appContainer) {
-                    appContainer.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                // Cerca la sezione principale della prenotazione (es. l'id della sezione o del contenitore padre)
+                const bookingSection = document.getElementById('booking') || appContainer;
+                if (bookingSection) {
+                    bookingSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
                 }
             } else {
                 err = j.message || "Errore durante la prenotazione.";
