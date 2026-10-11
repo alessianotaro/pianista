@@ -416,7 +416,8 @@
                         <h4 class="text-xl font-serif text-amber-400">Gestione Chiusure e Giorni/Orari Occupati</h4>
                         <p class="text-sm text-stone-400">Blocca un'intera giornata o un singolo orario in cui non desideri ricevere prenotazioni.</p>
                         
-                        <form id="block-form" class="grid grid-cols-1 sm:grid-cols-6 gap-4 items-end pt-2">
+                        
+                        <form id="block-form" class="grid grid-cols-1 sm:grid-cols-5 gap-4 items-end pt-2">
                             <div>
                                 <label class="block text-xs text-stone-300 mb-1">Tipo di Blocco</label>
                                 <select id="block-type" class="w-full bg-stone-950 border gold-border rounded-lg px-3 py-2 text-stone-200 text-sm">
@@ -424,10 +425,16 @@
                                     <option value="slot">Fascia Oraria</option>
                                 </select>
                             </div>
+                            
+                            <!-- Sostituito input date con un selettore interattivo o input nascosto con data selezionata -->
                             <div>
-                                <label class="block text-xs text-stone-300 mb-1">Data</label>
-                                <input type="date" id="block-date" required class="w-full bg-stone-950 border gold-border rounded-lg px-3 py-2 text-stone-200 text-sm">
+                                <label class="block text-xs text-stone-300 mb-1">Data Selezionata</label>
+                                <div id="admin-calendar-container" class="bg-stone-950 border gold-border rounded-lg p-2 text-center text-sm text-amber-400 font-medium">
+                                    Clicca un giorno sotto
+                                </div>
+                                <input type="hidden" id="block-date" required>
                             </div>
+
                             <div id="block-time-wrapper">
                                 <label class="block text-xs text-stone-300 mb-1">Orario Inizio</label>
                                 <select id="block-time" class="w-full bg-stone-950 border gold-border rounded-lg px-3 py-2 text-stone-200 text-sm">
@@ -441,6 +448,7 @@
                                     <option value="16:30">16:30</option>
                                 </select>
                             </div>
+
                             <div id="block-duration-wrapper">
                                 <label class="block text-xs text-stone-300 mb-1">Durata Blocco</label>
                                 <select id="block-hours" class="w-full bg-stone-950 border gold-border rounded-lg px-3 py-2 text-stone-200 text-sm">
@@ -451,14 +459,22 @@
                                     <option value="5">5 Ore</option>
                                 </select>
                             </div>
+
                             <div>
                                 <label class="block text-xs text-stone-300 mb-1">Motivazione</label>
                                 <input type="text" id="block-reason" placeholder="Es. Riunione / Concerto" class="w-full bg-stone-950 border gold-border rounded-lg px-3 py-2 text-stone-200 text-sm">
                             </div>
-                            <div>
-                                <button type="submit" class="w-full py-2.5 bg-amber-600 text-stone-950 font-semibold rounded-lg hover:bg-amber-500 text-sm">Aggiungi Blocco</button>
-                            </div>
                         </form>
+
+                        <!-- Mini calendario interattivo per l'admin -->
+                        <div id="admin-mini-calendar" class="mt-4 bg-stone-950/60 border border-stone-800 p-4 rounded-xl max-w-sm">
+                            <!-- Popolato dinamicamente da JS -->
+                        </div>
+
+                        <div class="mt-4">
+                            <button type="button" onclick="window.submitAdminBlock()" class="px-6 py-2.5 bg-amber-600 text-stone-950 font-semibold rounded-lg hover:bg-amber-500 text-sm">Aggiungi Blocco</button>
+                        </div>
+
                         
                         <!-- Tabella Blocchi Attivi -->
                         <div class="overflow-x-auto pt-4 border-t border-stone-800">

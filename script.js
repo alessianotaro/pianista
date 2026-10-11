@@ -540,11 +540,24 @@ document.addEventListener('DOMContentLoaded', () => {
         if (tbodyB) {
             tbodyB.innerHTML = '';
             if (existingBookings.length > 0) {
+                // Ordina per data crescente e, a parità di data, per ora crescente
+                existingBookings.sort((a, b) => {
+                    if (a.date !== b.date) {
+                        return a.date.localeCompare(b.date);
+                    }
+                    return a.time.localeCompare(b.time);
+                });
+
                 existingBookings.forEach(b => {
+                    // Formatta la data in stile italiano (es. Lunedì 12 ottobre 2026)
+                    const dataItaliana = new Date(b.date + "T12:00").toLocaleDateString("it-IT", { 
+                        weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' 
+                    });
+
                     const tr = document.createElement('tr');
                     tr.className = 'border-b border-stone-800 hover:bg-stone-950/40';
                     tr.innerHTML = `
-                        <td class="p-3">${b.date}</td>
+                        <td class="p-3 capitalize text-stone-300">${dataItaliana}</td>
                         <td class="p-3 font-semibold text-amber-400">${b.time}</td>
                         <td class="p-3">${b.name} ${b.surname}</td>
                         <td class="p-3">${b.instrument}</td>
