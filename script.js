@@ -58,6 +58,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 if (curriculumFade) curriculumFade.style.display = 'block';
                 if (toggleText) toggleText.textContent = 'Leggi tutto';
                 if (curriculumArrow) curriculumArrow.style.transform = 'rotate(0deg)';
+                curriculumContainer.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
             }
         });
     }
@@ -230,7 +231,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
 
                 h += `
-                <div class="bg-stone-950/40 p-3 rounded-xl border border-stone-800 flex justify-between items-center text-xs">
+                <div class="bg-stone-950/40 p-3 rounded-xl border border-stone-800 flex flex-col space-y-1 text-xs">
                     <span class="text-stone-300">Durata della prova: <b>1 ora</b></span>
                     <span class="text-stone-500 italic">Per durate superiori, contattare il docente</span>
                 </div>

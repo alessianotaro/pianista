@@ -429,10 +429,11 @@
                             <!-- Sostituito input date con un selettore interattivo o input nascosto con data selezionata -->
                             <div>
                                 <label class="block text-xs text-stone-300 mb-1">Data Selezionata</label>
-                                <div id="admin-calendar-container" class="bg-stone-950 border gold-border rounded-lg p-2 text-center text-sm text-amber-400 font-medium">
-                                    Clicca un giorno sotto
+                                <!-- Mini calendario interattivo per l'admin -->
+                                <div id="admin-mini-calendar" class="mt-4 bg-stone-950/60 border border-stone-800 p-4 rounded-xl max-w-sm">
+                                <!-- Popolato dinamicamente da JS -->
                                 </div>
-                                <input type="hidden" id="block-date" required>
+                                <input type="date" id="block-date" required>
                             </div>
 
                             <div id="block-time-wrapper">
@@ -466,16 +467,12 @@
                             </div>
                         </form>
 
-                        <!-- Mini calendario interattivo per l'admin -->
-                        <div id="admin-mini-calendar" class="mt-4 bg-stone-950/60 border border-stone-800 p-4 rounded-xl max-w-sm">
-                            <!-- Popolato dinamicamente da JS -->
-                        </div>
 
                         <div class="mt-4">
                             <button type="button" onclick="window.submitAdminBlock()" class="px-6 py-2.5 bg-amber-600 text-stone-950 font-semibold rounded-lg hover:bg-amber-500 text-sm">Aggiungi Blocco</button>
                         </div>
 
-                        
+
                         <!-- Tabella Blocchi Attivi -->
                         <div class="overflow-x-auto pt-4 border-t border-stone-800">
                             <h5 class="text-sm font-semibold text-stone-300 mb-3">Periodi attualmente bloccati:</h5>
