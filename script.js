@@ -23,7 +23,7 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // 2. Curriculum "Leggi tutto" dinamico per mobile
+    // 2. Curriculum "Leggi tutto" dinamico solo per mobile
     const curriculumContainer = document.getElementById('curriculum-container');
     const toggleCurriculumBtn = document.getElementById('toggle-curriculum-btn');
     const curriculumFade = document.getElementById('curriculum-fade');
@@ -32,6 +32,21 @@ document.addEventListener('DOMContentLoaded', () => {
 
     if (toggleCurriculumBtn && curriculumContainer) {
         let isExpanded = false;
+
+        // Reset per schermi desktop
+        function checkScreenSize() {
+            if (window.innerWidth >= 640) {
+                curriculumContainer.style.maxHeight = 'none';
+            } else {
+                if (!isExpanded) {
+                    curriculumContainer.style.maxHeight = '200px';
+                }
+            }
+        }
+
+        window.addEventListener('resize', checkScreenSize);
+        checkScreenSize(); // Esegui all'avvio
+
         toggleCurriculumBtn.addEventListener('click', () => {
             isExpanded = !isExpanded;
             if (isExpanded) {
@@ -58,9 +73,14 @@ document.addEventListener('DOMContentLoaded', () => {
     const ds = d => d.getFullYear() + "-" + pad(d.getMonth() + 1) + "-" + pad(d.getDate());
     const it = d => new Date(d + "T12:00").toLocaleDateString("it-IT", { weekday: "long", day: "numeric", month: "long" });
 
-    // Orari base suddivisi per fasce (Mattina fino alle 13:00, Pomeriggio dalle 14:30 alle 16:30)
-    const morningSlots = ['09:00', '10:00', '11:00', '12:00', '13:00'];
-    const afternoonSlots = ['14:30', '15:30', '16:30'];
+    // Funzione per formattare la durata in formato leggibile (es. 68 min -> "1h 8m")
+    function formatDurationLabel(mins) {
+        const h = Math.floor(mins / 60);
+        const m = mins % 60;
+        if (h === 0) return `${m} min`;
+        if (m === 0) return `${h} ${h === 1 ? 'ora' : 'ore'}`;
+        return `${h}h ${m}m (${mins} min)`;
+    }
 
     function timeToMinutes(timeStr) {
         const [h, m] = timeStr.split(':').map(Number);
@@ -75,6 +95,13 @@ document.addEventListener('DOMContentLoaded', () => {
         const slotTimeStr = hm(t);
         if (dateBlocks.some(b => b.time === slotTimeStr)) return false;
 
+        // Controllo sovrapposizione con Pausa Pranzo (14:00 - 14:30)
+        const breakStart = 14 * 60;
+        const breakEnd = 14 * 60 + 30;
+        if (t < breakEnd && t + dur > breakStart) {
+            return false;
+        }
+
         return !existingBookings.some(b => {
             if (b.date !== sel) return false;
             const bTimeMinutes = timeToMinutes(b.time);
@@ -87,6 +114,20 @@ document.addEventListener('DOMContentLoaded', () => {
         const currentMinutes = now.getHours() * 60 + now.getMinutes();
         const r = [];
 
+        function generateDynamicSlots(startHour, startMin, endHour, endMin) {
+            const startTime = startHour * 60 + startMin;
+            const endTime = endHour * 60 + endMin;
+            const slots = [];
+            
+            for (let m = startTime; m < endTime; m += 30) {
+                slots.push(hm(m));
+            }
+            return slots;
+        }
+
+        const morningSlots = generateDynamicSlots(9, 0, 13, 0);
+        const afternoonSlots = generateDynamicSlots(14, 30, 16, 30);
+
         function processSlots(slots, maxEndHour, maxEndMin) {
             slots.forEach(slotStr => {
                 const t = timeToMinutes(slotStr);
@@ -94,7 +135,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 const maxAllowedEnd = maxEndHour * 60 + maxEndMin;
 
                 if (endT > maxAllowedEnd) {
-                    return; // Salta se la durata sfora la fine della fascia oraria
+                    return; 
                 }
 
                 const past = today && t <= currentMinutes;
@@ -106,10 +147,7 @@ document.addEventListener('DOMContentLoaded', () => {
             });
         }
 
-        // Mattina (limite massimo fine fascia: 13:00)
         processSlots(morningSlots, 13, 0);
-
-        // Pomeriggio (limite massimo fine fascia: 16:30)
         processSlots(afternoonSlots, 16, 30);
 
         return r;
@@ -138,7 +176,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 <div class="text-center py-8 space-y-4">
                     <h3 class="text-2xl font-serif text-amber-400">Prenotazione confermata ✨</h3>
                     <p class="text-stone-300"><b>${done.name} ${done.surname}</b>, ti aspettiamo per la prova.</p>
-                    <p class="text-sm text-stone-400">${it(done.date)}<br>ore ${hm(done.start)} · ${done.duration} min (${done.instrument})</p>
+                    <p class="text-sm text-stone-400">${it(done.date)}<br>ore ${hm(done.start)} · ${formatDurationLabel(done.duration)} (${done.instrument})</p>
                     <button type="button" onclick="window.resetBooking()" class="px-6 py-2.5 bg-amber-600 text-stone-950 font-semibold rounded-lg hover:bg-amber-500">Nuova prenotazione</button>
                 </div>`;
             return;
@@ -167,48 +205,79 @@ document.addEventListener('DOMContentLoaded', () => {
             ${cal}`;
 
         if (sel) {
+            // Controlla se l'intera giornata è bloccata e recupera il motivo
+            const dayBlock = blockedSlotsList.find(b => b.date === sel && b.type === 'day');
+            
+            // Recupera eventuali blocchi per orari specifici
+            const slotBlocks = blockedSlotsList.filter(b => b.date === sel && b.type === 'slot');
+
             h += `<div class="mt-6 pt-6 border-t border-stone-800 space-y-4">
-                <p class="text-sm font-semibold text-amber-400">Data selezionata: ${it(sel)}</p>
-                
-                <div>
-                    <label class="block text-xs text-stone-400 mb-1">Durata della Prova</label>
-                    <select id="widget-duration" onchange="window.setDuration(this.value)" class="w-full bg-stone-950 border border-stone-800 rounded-lg px-3 py-2 text-stone-200 text-sm">
-                        <option value="30" ${durationMinutes === 30 ? 'selected' : ''}>30 minuti</option>
-                        <option value="60" ${durationMinutes === 60 ? 'selected' : ''}>60 minuti (1 ora)</option>
-                        <option value="90" ${durationMinutes === 90 ? 'selected' : ''}>90 minuti</option>
-                        <option value="120" ${durationMinutes === 120 ? 'selected' : ''}>120 minuti (2 ore)</option>
-                    </select>
+                <p class="text-sm font-semibold text-amber-400">Data selezionata: ${it(sel)}</p>`;
+
+            // Se l'intera giornata è bloccata, mostra l'avviso e il motivo
+            if (dayBlock) {
+                h += `
+                    <div class="bg-red-950/40 border border-red-800/60 p-4 rounded-xl text-center space-y-1">
+                        <p class="text-red-300 font-semibold text-sm">Giornata non disponibile per le prenotazioni</p>
+                        <p class="text-stone-400 text-xs italic">Motivo: ${dayBlock.reason || 'Chiusura straordinaria'}</p>
+                    </div>`;
+            } else {
+                // Se ci sono orari specifici bloccati nella giornata, mostra l'elenco dei motivi
+                if (slotBlocks.length > 0) {
+                    h += `<div class="bg-amber-950/30 border border-amber-800/50 p-3 rounded-xl text-xs space-y-1">
+                        <p class="text-amber-300 font-medium">Nota per questa giornata:</p>
+                        <ul class="list-disc list-inside text-stone-400 space-y-0.5">`;
+                    slotBlocks.forEach(sb => {
+                        h += `<li>Ore <b>${sb.time}</b> non disponibile: <i>${sb.reason || 'Riservato'}</i></li>`;
+                    });
+                    h += `</ul></div>`;
+                }
+
+                h += `
+                <!-- Cursore continuo con step di 1 minuto (da 60 a 120 minuti) -->
+                <div class="bg-stone-950/40 p-3 rounded-xl border border-stone-800">
+                    <div class="flex justify-between items-center mb-1">
+                        <label class="block text-xs text-stone-400">Durata della Prova</label>
+                        <span id="duration-label" class="text-xs font-semibold text-amber-400">${formatDurationLabel(durationMinutes)}</span>
+                    </div>
+                    <input type="range" id="widget-duration-range" min="60" max="120" step="1" value="${durationMinutes}" oninput="window.setDurationRange(this.value)" class="w-full accent-amber-500 cursor-pointer">
+                    <div class="flex justify-between text-[10px] text-stone-500 mt-1">
+                        <span>1 ora (60 min)</span>
+                        <span>1h 30m</span>
+                        <span>2 ore (120 min)</span>
+                    </div>
                 </div>
 
                 <div>
                     <label class="block text-xs text-stone-400 mb-2">Orari Disponibili</label>
                     <div class="grid grid-cols-3 sm:grid-cols-4 gap-2">`;
             
-            let anyAvailable = false;
-            getAvailableSlots().forEach(([t, ok]) => {
-                if (ok) anyAvailable = true;
-                const isSelectedTime = start === t;
-                h += `<button type="button" class="py-2 rounded-lg text-xs font-medium border transition ${isSelectedTime ? 'bg-amber-600 text-stone-950 font-bold' : ok ? 'bg-stone-950 border-stone-800 hover:border-amber-400 text-stone-300' : 'bg-stone-950 border-stone-900 text-stone-700 line-through cursor-not-allowed'}" ${ok ? '' : 'disabled'} onclick="window.pickTime(${t})">${hm(t)}</button>`;
-            });
-            h += `</div>`;
-            if (!anyAvailable) h += `<p class="text-xs text-stone-500 mt-2">Nessun orario disponibile per questa durata in questo giorno.</p>`;
-            h += `</div>`;
+                let anyAvailable = false;
+                getAvailableSlots().forEach(([t, ok]) => {
+                    if (ok) anyAvailable = true;
+                    const isSelectedTime = start === t;
+                    h += `<button type="button" class="py-2 rounded-lg text-xs font-medium border transition ${isSelectedTime ? 'bg-amber-600 text-stone-950 font-bold' : ok ? 'bg-stone-950 border-stone-800 hover:border-amber-400 text-stone-300' : 'bg-stone-950 border-stone-900 text-stone-700 line-through cursor-not-allowed'}" ${ok ? '' : 'disabled'} onclick="window.pickTime(${t})">${hm(t)}</button>`;
+                });
+                h += `</div>`;
+                if (!anyAvailable) h += `<p class="text-xs text-stone-500 mt-2">Nessun orario disponibile per questa durata in questo giorno.</p>`;
+                h += `</div>`;
 
-            if (start !== null) {
-                h += `
-                    <div class="space-y-3 pt-4 border-t border-stone-800">
-                        <p class="text-xs font-semibold text-amber-400">Inserisci i tuoi dati</p>
-                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                            <input id="w-name" placeholder="Nome *" class="w-full bg-stone-950 border border-stone-800 rounded-lg px-3 py-2 text-sm text-stone-200">
-                            <input id="w-surname" placeholder="Cognome *" class="w-full bg-stone-950 border border-stone-800 rounded-lg px-3 py-2 text-sm text-stone-200">
-                        </div>
-                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                            <input id="w-instrument" placeholder="Strumento / Voce *" class="w-full bg-stone-950 border border-stone-800 rounded-lg px-3 py-2 text-sm text-stone-200">
-                            <input id="w-piece" placeholder="Brano in prova *" class="w-full bg-stone-950 border border-stone-800 rounded-lg px-3 py-2 text-sm text-stone-200">
-                        </div>
-                        <p class="text-red-400 text-xs">${err}</p>
-                        <button type="button" id="w-go" onclick="window.submitWidgetBooking()" class="w-full py-3 bg-amber-600 text-stone-950 font-semibold rounded-lg hover:bg-amber-500 text-sm">Conferma Prenotazione (${hm(start)} - ${hm(start + durationMinutes)})</button>
-                    </div>`;
+                if (start !== null) {
+                    h += `
+                        <div class="space-y-3 pt-4 border-t border-stone-800">
+                            <p class="text-xs font-semibold text-amber-400">Inserisci i tuoi dati</p>
+                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                                <input id="w-name" placeholder="Nome *" class="w-full bg-stone-950 border border-stone-800 rounded-lg px-3 py-2 text-sm text-stone-200">
+                                <input id="w-surname" placeholder="Cognome *" class="w-full bg-stone-950 border border-stone-800 rounded-lg px-3 py-2 text-sm text-stone-200">
+                            </div>
+                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                                <input id="w-instrument" placeholder="Strumento / Voce *" class="w-full bg-stone-950 border border-stone-800 rounded-lg px-3 py-2 text-sm text-stone-200">
+                                <input id="w-piece" placeholder="Brano in prova *" class="w-full bg-stone-950 border border-stone-800 rounded-lg px-3 py-2 text-sm text-stone-200">
+                            </div>
+                            <p class="text-red-400 text-xs">${err}</p>
+                            <button type="button" id="w-go" onclick="window.submitWidgetBooking()" class="w-full py-3 bg-amber-600 text-stone-950 font-semibold rounded-lg hover:bg-amber-500 text-sm">Conferma Prenotazione (${hm(start)} - ${hm(start + durationMinutes)})</button>
+                        </div>`;
+                }
             }
             h += `</div>`;
         }
@@ -230,9 +299,11 @@ document.addEventListener('DOMContentLoaded', () => {
         await renderCalendarWidget();
     };
 
-    window.setDuration = function(val) {
+    window.setDurationRange = function(val) {
         durationMinutes = parseInt(val);
         start = null;
+        const label = document.getElementById('duration-label');
+        if (label) label.textContent = formatDurationLabel(durationMinutes);
         renderCalendarWidget();
     };
 
@@ -393,7 +464,8 @@ document.addEventListener('DOMContentLoaded', () => {
             const payload = {
                 type: document.getElementById('block-type').value,
                 date: document.getElementById('block-date').value,
-                time: document.getElementById('block-type').value === 'slot' ? document.getElementById('block-time').value : null
+                time: document.getElementById('block-type').value === 'slot' ? document.getElementById('block-time').value : null,
+                reason: document.getElementById('block-reason')?.value.trim() || 'Chiuso'
             };
 
             try {
@@ -538,6 +610,7 @@ document.addEventListener('DOMContentLoaded', () => {
                         <td class="p-2.5 font-semibold text-amber-400">${b.type === 'day' ? 'Intera Giornata' : 'Orario Specifico'}</td>
                         <td class="p-2.5">${b.date}</td>
                         <td class="p-2.5">${b.time || '-'}</td>
+                        <td class="p-2.5 italic text-stone-400">${b.reason || 'Chiuso'}</td>
                         <td class="p-2.5 text-right">
                             <button onclick="deleteBlock('${b.id}')" class="px-3 py-1 bg-red-900/40 border border-red-700 text-red-300 rounded text-xs hover:bg-red-900">Rimuovi</button>
                         </td>
@@ -545,7 +618,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     tbodyBl.appendChild(tr);
                 });
             } else {
-                tbodyBl.innerHTML = `<tr><td colspan="4" class="p-3 text-center text-stone-500">Nessun blocco attivo.</td></tr>`;
+                tbodyBl.innerHTML = `<tr><td colspan="5" class="p-3 text-center text-stone-500">Nessun blocco attivo.</td></tr>`;
             }
         }
     }
